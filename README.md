@@ -1,3 +1,3 @@
-# dobs - _d_one tasks and _obs_tacles
+# dobs - * *d* *one tasks and * *obs* *tacles
 
 diary for done tasks and log of obstacles
