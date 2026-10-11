@@ -56,8 +56,9 @@ Journal, Report und Hindernisse:
 - **Durchschnitt in %** (Ø Sterne / 5) mit Anzahl der Bewertungen. Klick
   öffnet ein kleines Fenster mit der Verteilung wie bei Amazon: je
   Sternzahl Balken, Anteil in % und Anzahl.
-- **🙋 Hilfe anbieten:** an/aus pro Benutzer. Klick auf die Anzahl zeigt die
-  Namen derer, die Hilfe anbieten.
+- **🙋 Unterstützung anbieten:** an/aus pro Benutzer, bei jedem Eintrag
+  (nicht nur bei Hindernissen). Klick auf die Anzahl zeigt die Namen derer,
+  die Unterstützung anbieten.
 
 ## Tab 1 – Journal
 

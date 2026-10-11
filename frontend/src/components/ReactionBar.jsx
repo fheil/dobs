@@ -28,7 +28,7 @@ function RatingHistogram({ counts, total, average }) {
 }
 
 // Feedback row under an entry: "shocked" smiley (only when the entry has an
-// obstacle), own 1-5 star rating, average in %, and "offer help".
+// obstacle), own 1-5 star rating, average in %, and "offer support".
 // Everyone with read access to the project may use it.
 export default function ReactionBar({ entry, onChange, onError }) {
   const r = entry.reactions;
@@ -101,7 +101,7 @@ export default function ReactionBar({ entry, onChange, onError }) {
         <button
           type="button"
           className={`reaction-toggle help${r.myHelp ? ' on' : ''}`}
-          title={r.myHelp ? 'Hilfsangebot zurückziehen' : 'Hilfe anbieten'}
+          title={r.myHelp ? 'Unterstützungsangebot zurückziehen' : 'Unterstützung anbieten'}
           aria-pressed={r.myHelp}
           onClick={() => call('/reactions/help', { active: !r.myHelp })}
         >
@@ -110,10 +110,10 @@ export default function ReactionBar({ entry, onChange, onError }) {
         {r.help.length > 0 && (
           <Popover
             className="count"
-            title="Wer Hilfe anbietet"
+            title="Wer Unterstützung anbietet"
             label={r.help.length}
           >
-            <p className="popover-title">Bieten Hilfe an:</p>
+            <p className="popover-title">Bieten Unterstützung an:</p>
             <ul className="name-list">
               {r.help.map(name => <li key={name}>{name}</li>)}
             </ul>
