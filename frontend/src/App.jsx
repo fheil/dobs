@@ -112,7 +112,7 @@ function MainApp({ user, logout }) {
             <h3>Kein Projekt zugeordnet</h3>
             <p>{user.admin
               ? 'Lege unter Einstellungen → Projekte ein Projekt an.'
-              : 'Bitte einen Admin, dich einem Projekt zuzuordnen.'}</p>
+              : 'Dir ist noch kein Projekt zugeordnet.'}</p>
           </div>
         )}
 

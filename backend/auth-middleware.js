@@ -18,8 +18,9 @@ export function isCurrentUserAdmin(req) {
   return !!db.prepare('SELECT admin FROM users WHERE id = ?').get(req.user.id)?.admin;
 }
 
+// Non-admins get a plain 404, so the admin API doesn't reveal itself.
 export function requireAdmin(req, res, next) {
-  if (!isCurrentUserAdmin(req)) return res.status(403).json({ error: 'Nur für Admins.' });
+  if (!isCurrentUserAdmin(req)) return res.status(404).json({ error: 'Nicht gefunden.' });
   next();
 }
 

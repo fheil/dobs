@@ -115,9 +115,12 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
 
       {toDelete && (
         <ConfirmDialog
-          message={toDelete.user_id === user.id
-            ? `Eintrag „${toDelete.title || 'ohne Titel'}“ löschen? Ein Admin kann ihn wiederherstellen.`
-            : `Eintrag „${toDelete.title || 'ohne Titel'}“ von ${toDelete.username} als Admin löschen? Er lässt sich wiederherstellen.`}
+          // Normal users learn nothing about what admins can do.
+          message={!user.admin
+            ? `Eintrag „${toDelete.title || 'ohne Titel'}“ löschen?`
+            : toDelete.user_id === user.id
+              ? `Eintrag „${toDelete.title || 'ohne Titel'}“ löschen? Er lässt sich wiederherstellen.`
+              : `Eintrag „${toDelete.title || 'ohne Titel'}“ von ${toDelete.username} als Admin löschen? Er lässt sich wiederherstellen.`}
           onConfirm={remove}
           onCancel={() => setToDelete(null)}
         />

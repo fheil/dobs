@@ -210,16 +210,20 @@ router.delete('/:id', loadEntry, (req, res) => {
   res.json(byId(req.entry.id, req));
 });
 
+// Restore/purge: non-admins get a plain 404 - they learn nothing about
+// what admins can do.
+const NOT_FOUND = { error: 'Eintrag nicht gefunden.' };
+
 router.post('/:id/restore', loadEntry, (req, res) => {
-  if (!req.perms.canRestore) return res.status(403).json({ error: 'Nur Admins können gelöschte Einträge wiederherstellen.' });
+  if (!req.perms.canRestore) return res.status(404).json(NOT_FOUND);
   db.prepare('UPDATE entries SET deleted_at = NULL, deleted_by = NULL WHERE id = ?').run(req.entry.id);
   res.json(byId(req.entry.id, req));
 });
 
 // Final removal (with its ratings/reactions) of an already deleted entry.
 router.delete('/:id/purge', loadEntry, (req, res) => {
+  if (!isCurrentUserAdmin(req)) return res.status(404).json(NOT_FOUND);
   if (!req.entry.deleted_at) return res.status(409).json({ error: 'Nur bereits gelöschte Einträge können endgültig entfernt werden.' });
-  if (!req.perms.canRestore) return res.status(403).json({ error: 'Nur Admins können gelöschte Einträge endgültig entfernen.' });
   db.prepare('DELETE FROM entries WHERE id = ?').run(req.entry.id);
   res.json({ purged: 1 });
 });
