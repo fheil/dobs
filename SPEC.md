@@ -52,7 +52,8 @@ Journal, Report und Hindernisse:
 - **😱 Sehr verwundert über das Hindernis:** an/aus pro Benutzer, mit
   Anzahl; nur bei Einträgen mit Hindernis.
 - **1–5 Sterne:** eine Bewertung pro Benutzer, nur die eigene änderbar;
-  erneuter Klick auf den gesetzten Stern nimmt sie zurück.
+  ✕ hinter den Sternen (oder erneuter Klick auf den gesetzten Stern) nimmt
+  sie zurück.
 - **Durchschnitt in %** (Ø Sterne / 5) mit Anzahl der Bewertungen. Klick
   öffnet ein kleines Fenster mit der Verteilung wie bei Amazon: je
   Sternzahl Balken, Anteil in % und Anzahl.
@@ -77,9 +78,10 @@ Journal, Report und Hindernisse:
 
 - Eine Seite pro Tag, mit vor/zurück-Buttons und „Heute“-Button.
 - Weiße Kacheln, eine Kachel = ein Eintrag, direkt in der Kachel editierbar.
-- Unter den Kacheln: `+` (neuen Eintrag anlegen) und `−` (ausgewählten
-  Eintrag löschen, mit Rückfrage). Ist Löschen gesperrt, ist `−` ausgegraut
-  und nennt per Tooltip den Grund.
+- Unter den Kacheln: `+` (neuen Eintrag anlegen).
+- Mülleimer ganz rechts in der Reaktionszeile jeder Kachel (eigene Einträge,
+  für Admins alle): löscht mit Rückfrage. Ist Löschen gesperrt, ist er
+  ausgegraut und nennt per Tooltip den Grund.
 - Mit „nur Lesen“ sind die Kacheln gesperrt und `+`/`−` ausgeblendet.
 
 ## Tab 2 – Report

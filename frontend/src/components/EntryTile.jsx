@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, Trash2 } from 'lucide-react';
 import ReactionBar from './ReactionBar';
 import DeletedBanner from './DeletedBanner';
 
@@ -8,7 +8,7 @@ const EDITABLE = ['title', 'content', 'obstacles', 'entry_date', 'entry_time', '
 // One journal entry as an inline-editable tile. Text fields save on blur,
 // date/time/checkbox save on change. What is editable comes from the
 // server-computed entry.permissions.
-export default function EntryTile({ entry, showAuthor, selected, autoFocus, onSelect, onSave, onReactions, onRestored, onPurged, onError }) {
+export default function EntryTile({ entry, showAuthor, showDelete, autoFocus, onSave, onDelete, onReactions, onRestored, onPurged, onError }) {
   const [draft, setDraft] = useState(entry);
   const deleted = !!entry.deleted_at;
   const { canEdit, contentLocked } = entry.permissions;
@@ -39,9 +39,7 @@ export default function EntryTile({ entry, showAuthor, selected, autoFocus, onSe
 
   return (
     <div
-      className={`tile${selected ? ' selected' : ''}${draft.done ? ' done' : ''}${fieldsLocked ? ' readonly' : ''}${deleted ? ' deleted' : ''}`}
-      onMouseDown={() => onSelect(entry.id)}
-      onFocusCapture={() => onSelect(entry.id)}
+      className={`tile${draft.done ? ' done' : ''}${fieldsLocked ? ' readonly' : ''}${deleted ? ' deleted' : ''}`}
     >
       {deleted && <DeletedBanner entry={entry} onRestored={onRestored} onPurged={onPurged} onError={onError} />}
       <div className="tile-head">
@@ -120,7 +118,22 @@ export default function EntryTile({ entry, showAuthor, selected, autoFocus, onSe
           <Lock size={14} /> Andere haben reagiert – nur „Erledigt“ lässt sich noch ändern.
         </p>
       )}
-      {!deleted && <ReactionBar entry={{ ...entry, obstacles: draft.obstacles }} onChange={onReactions} onError={onError} />}
+      {!deleted && (
+        <ReactionBar entry={{ ...entry, obstacles: draft.obstacles }} onChange={onReactions} onError={onError}>
+          {showDelete && (
+            <button
+              type="button"
+              className="icon danger"
+              title={entry.permissions.deleteBlocked || 'Eintrag löschen'}
+              aria-label="Eintrag löschen"
+              disabled={!entry.permissions.canDelete}
+              onClick={() => onDelete(entry)}
+            >
+              <Trash2 size={18} />
+            </button>
+          )}
+        </ReactionBar>
+      )}
     </div>
   );
 }

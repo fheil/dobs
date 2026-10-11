@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Minus, NotebookPen, Plus } from 'lucide-react';
+import { NotebookPen, Plus } from 'lucide-react';
 import { api } from '../api';
 import { addDays, fmtLong, today } from '../dates';
 import PeriodNav from './PeriodNav';
@@ -9,15 +9,13 @@ import ConfirmDialog from './ConfirmDialog';
 export default function JournalTab({ project, user, date, onDateChange, onError }) {
   const canWrite = project.role === 'write';
   const [entries, setEntries] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
   const [newId, setNewId] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [toDelete, setToDelete] = useState(null);
 
   const load = () => api(`/entries?project_id=${project.id}&from=${date}&to=${date}`);
 
   useEffect(() => {
     let cancelled = false;
-    setSelectedId(null);
     load()
       .then(list => { if (!cancelled) setEntries(list); })
       .catch(e => onError(e.message));
@@ -28,7 +26,6 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
     try {
       const entry = await api('/entries', { method: 'POST', body: JSON.stringify({ project_id: project.id, entry_date: date }) });
       setEntries(list => [...list, entry]);
-      setSelectedId(entry.id);
       setNewId(entry.id);
     } catch (e) {
       onError(e.message);
@@ -52,10 +49,10 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
   const drop = id => setEntries(list => list.filter(e => e.id !== id));
 
   const remove = async () => {
-    setConfirmDelete(false);
+    const entry = toDelete;
+    setToDelete(null);
     try {
-      await api(`/entries/${selectedId}`, { method: 'DELETE' });
-      setSelectedId(null);
+      await api(`/entries/${entry.id}`, { method: 'DELETE' });
       // Reload: admins may keep seeing the entry (as deleted), others don't.
       setEntries(await load());
     } catch (e) {
@@ -63,11 +60,9 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
     }
   };
 
-  const selected = entries.find(e => e.id === selectedId);
-  const canDelete = !!selected?.permissions.canDelete;
-  const deleteTitle = !selected
-    ? 'Zum Löschen erst eine Kachel anklicken'
-    : selected.permissions.deleteBlocked || 'Ausgewählten Eintrag löschen';
+  // Trash icon for own entries (with write access) and for admins; it is
+  // disabled with the reason as tooltip when the delete rules block it.
+  const mayEverDelete = entry => user.admin || (canWrite && entry.user_id === user.id);
   const hasOtherAuthors = entries.some(e => e.user_id !== user.id);
 
   return (
@@ -97,10 +92,10 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
               key={`${entry.id}:${entry.deleted_at || ''}`}
               entry={entry}
               showAuthor={hasOtherAuthors}
-              selected={entry.id === selectedId}
+              showDelete={mayEverDelete(entry)}
               autoFocus={entry.id === newId}
-              onSelect={setSelectedId}
               onSave={save}
+              onDelete={setToDelete}
               onReactions={setReactions}
               onRestored={replace}
               onPurged={drop}
@@ -110,31 +105,21 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
         </div>
       )}
 
-      {(canWrite || user.admin) && <div className="tile-actions">
-        {canWrite && (
+      {canWrite && (
+        <div className="tile-actions">
           <button type="button" className="primary round" title="Neuer Eintrag" onClick={add}>
             <Plus size={22} />
           </button>
-        )}
-        <button
-          type="button"
-          className="primary round danger"
-          title={deleteTitle}
-          disabled={!canDelete}
-          onMouseDown={e => e.preventDefault()}
-          onClick={() => setConfirmDelete(true)}
-        >
-          <Minus size={22} />
-        </button>
-      </div>}
+        </div>
+      )}
 
-      {confirmDelete && canDelete && (
+      {toDelete && (
         <ConfirmDialog
-          message={selected.user_id === user.id
-            ? `Eintrag „${selected.title || 'ohne Titel'}“ löschen? Ein Admin kann ihn wiederherstellen.`
-            : `Eintrag „${selected.title || 'ohne Titel'}“ von ${selected.username} als Admin löschen? Er lässt sich wiederherstellen.`}
+          message={toDelete.user_id === user.id
+            ? `Eintrag „${toDelete.title || 'ohne Titel'}“ löschen? Ein Admin kann ihn wiederherstellen.`
+            : `Eintrag „${toDelete.title || 'ohne Titel'}“ von ${toDelete.username} als Admin löschen? Er lässt sich wiederherstellen.`}
           onConfirm={remove}
-          onCancel={() => setConfirmDelete(false)}
+          onCancel={() => setToDelete(null)}
         />
       )}
     </div>

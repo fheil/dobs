@@ -470,10 +470,6 @@ main {
   transition: border-color 0.15s;
 }
 
-.tile.selected {
-  border-color: var(--accent-400);
-}
-
 .tile.done {
   background: linear-gradient(90deg, #ecfdf5 0, #fff 120px);
 }
@@ -1247,4 +1243,29 @@ main {
 
 .switch-row.inactive b {
   color: var(--slate-400);
+}
+
+/* "Erledigt" sits in the tile header: no label top margin there. */
+.tile-head .check {
+  margin: 0;
+}
+
+.star-clear {
+  background: none;
+  border: none;
+  padding: 0.2rem;
+  margin-left: -0.6rem;
+  border-radius: 50%;
+  display: inline-flex;
+  color: var(--slate-400);
+}
+
+.star-clear:hover {
+  background: var(--slate-100);
+  color: var(--rose-500);
+}
+
+.reaction-end {
+  margin-left: auto;
+  display: inline-flex;
 }

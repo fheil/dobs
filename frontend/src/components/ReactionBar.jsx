@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star } from 'lucide-react';
+import { Star, X } from 'lucide-react';
 import { api } from '../api';
 import Popover from './Popover';
 
@@ -30,7 +30,7 @@ function RatingHistogram({ counts, total, average }) {
 // Feedback row under an entry: "shocked" smiley (only when the entry has an
 // obstacle), own 1-5 star rating, average in %, and "offer support".
 // Everyone with read access to the project may use it.
-export default function ReactionBar({ entry, onChange, onError }) {
+export default function ReactionBar({ entry, onChange, onError, children }) {
   const r = entry.reactions;
   const [hover, setHover] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -84,6 +84,18 @@ export default function ReactionBar({ entry, onChange, onError }) {
           </button>
         ))}
       </span>
+      {/* Outside .stars so hovering it doesn't keep the star preview lit. */}
+      {r.myRating && (
+        <button
+          type="button"
+          className="star-clear"
+          title="Meine Bewertung zurücknehmen"
+          aria-label="Meine Bewertung zurücknehmen"
+          onClick={() => call('/rating', { stars: null })}
+        >
+          <X size={14} />
+        </button>
+      )}
 
       {total > 0 ? (
         <Popover
@@ -120,6 +132,7 @@ export default function ReactionBar({ entry, onChange, onError }) {
           </Popover>
         )}
       </span>
+      {children && <span className="reaction-end">{children}</span>}
     </div>
   );
 }
