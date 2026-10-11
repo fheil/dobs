@@ -82,12 +82,14 @@ Journal, Report und Hindernisse:
 - Mülleimer ganz rechts in der Reaktionszeile jeder Kachel (eigene Einträge,
   für Admins alle): löscht mit Rückfrage. Ist Löschen gesperrt, ist er
   ausgegraut und nennt per Tooltip den Grund.
-- Mit „nur Lesen“ sind die Kacheln gesperrt und `+`/`−` ausgeblendet.
+- Mit „nur Lesen“ sind die Kacheln gesperrt und `+` ist ausgeblendet.
 
 ## Tab 2 – Report
 
 - Wochenansicht, mit vor/zurück-Buttons und „Heute“-Button.
-- Alle Einträge der gewählten Woche, nach Tag gruppiert.
+- Alle Einträge der gewählten Woche, nach Tag gruppiert. Standard: neuester
+  Tag oben (innerhalb eines Tages der späteste Eintrag oben); ein
+  Umschalter neben der Überschrift dreht die Reihenfolge um.
 - Es werden nur die Wochentage aus der persönlichen Einstellung
   „Report-Woche“ angezeigt.
 - Ein Klick auf einen Tag öffnet ihn im Journal.

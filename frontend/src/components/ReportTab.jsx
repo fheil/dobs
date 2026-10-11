@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Circle } from 'lucide-react';
+import { ArrowDownUp, CheckCircle2, Circle } from 'lucide-react';
 import { api } from '../api';
 import { addDays, fmtDate, fmtWeekday, startOfWeek, today } from '../dates';
 import PeriodNav from './PeriodNav';
 import ReactionBar from './ReactionBar';
 import DeletedBanner from './DeletedBanner';
 
+// Sort order is a per-browser convenience; newest day first by default.
+const ORDER_KEY = 'reportNewestFirst';
+const readNewestFirst = () => {
+  try { return localStorage.getItem(ORDER_KEY) !== 'false'; } catch { return true; }
+};
+
 export default function ReportTab({ project, user, onOpenDay, onError }) {
+  const [newestFirst, setNewestFirst] = useState(readNewestFirst);
   const [weekStart, setWeekStart] = useState(startOfWeek(today()));
   const [entries, setEntries] = useState([]);
   const [dayRange, setDayRange] = useState({ start: 0, end: 6 });
@@ -31,10 +38,24 @@ export default function ReportTab({ project, user, onOpenDay, onError }) {
   const replace = updated => setEntries(list => list.map(e => (e.id === updated.id ? updated : e)));
   const drop = id => setEntries(list => list.filter(e => e.id !== id));
 
+  const toggleOrder = () => setNewestFirst(v => {
+    try { localStorage.setItem(ORDER_KEY, String(!v)); } catch { /* not persisted - fine */ }
+    return !v;
+  });
+
+  // Days and the entries within a day share one direction.
+  const ordered = list => (newestFirst ? [...list].reverse() : list);
+
   return (
     <div className="tab-content">
       <div className="section-title">
-        <h2>Wochenreport</h2>
+        <div className="title-with-toggle">
+          <h2>Wochenreport</h2>
+          <button type="button" className="secondary small" onClick={toggleOrder}>
+            <ArrowDownUp size={16} />
+            {newestFirst ? 'Neueste zuerst' : 'Älteste zuerst'}
+          </button>
+        </div>
         <PeriodNav
           label={`${fmtDate(days[0])} – ${fmtDate(days[days.length - 1])}`}
           prevTitle="Vorherige Woche"
@@ -46,8 +67,8 @@ export default function ReportTab({ project, user, onOpenDay, onError }) {
         />
       </div>
 
-      {days.map(day => {
-        const dayEntries = entries.filter(e => e.entry_date === day);
+      {ordered(days).map(day => {
+        const dayEntries = ordered(entries.filter(e => e.entry_date === day));
         return (
           <section key={day} className="report-day">
             <h3>
