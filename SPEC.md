@@ -60,12 +60,26 @@ Journal, Report und Hindernisse:
   (nicht nur bei Hindernissen). Klick auf die Anzahl zeigt die Namen derer,
   die Unterstützung anbieten.
 
+## Löschen, Archiv und Sperren
+
+- Löschen archiviert nur: Der Eintrag ist für alle ausgeblendet (inkl.
+  Bewertungen/Reaktionen) und kann von Admins wiederhergestellt oder
+  endgültig gelöscht werden.
+- Autoren löschen eigene Einträge (mit „Lesen+Schreiben“), sofern die
+  Admin-Schalter es erlauben. Admins dürfen immer löschen, auch fremde
+  Einträge in Projekten, denen sie zugeordnet sind.
+- Für die Sperren zählen nur Reaktionen *anderer* Benutzer; eigene
+  Reaktionen sperren den Autor nicht aus.
+- Projekte mit Einträgen – auch gelöschten – können nicht gelöscht werden,
+  bis ein Admin diese endgültig entfernt.
+
 ## Tab 1 – Journal
 
 - Eine Seite pro Tag, mit vor/zurück-Buttons und „Heute“-Button.
 - Weiße Kacheln, eine Kachel = ein Eintrag, direkt in der Kachel editierbar.
 - Unter den Kacheln: `+` (neuen Eintrag anlegen) und `−` (ausgewählten
-  eigenen Eintrag löschen, mit Rückfrage).
+  Eintrag löschen, mit Rückfrage). Ist Löschen gesperrt, ist `−` ausgegraut
+  und nennt per Tooltip den Grund.
 - Mit „nur Lesen“ sind die Kacheln gesperrt und `+`/`−` ausgeblendet.
 
 ## Tab 2 – Report
@@ -102,6 +116,16 @@ Nur für Admins:
    gelöscht werden. Namen sind eindeutig (ohne Beachtung von Groß- und
    Kleinschreibung).
 5. **Admin-Rechte** erteilen und entziehen.
+6. **Löschen & Sperren** (gilt für alle Projekte):
+   - *Einträge löschen erlaubt* (Hauptschalter, Standard an)
+   - *Erledigte Einträge löschbar* (Standard aus: erst „Erledigt“
+     herausnehmen)
+   - *Einträge mit Reaktionen anderer löschbar* (Standard aus: gesperrt,
+     bis alle anderen ihre Reaktionen zurückgezogen haben)
+   - *Einträge mit Reaktionen anderer schreibgeschützt* (Standard an: nur
+     „Erledigt“ bleibt änderbar)
+   - *Admins sehen gelöschte Einträge* in Journal, Report und Hindernisse,
+     mit „Wiederherstellen“ und „Endgültig löschen“ (Standard an)
 
 ## Erscheinungsbild
 

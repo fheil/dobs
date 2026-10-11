@@ -4,6 +4,7 @@ import { api } from '../api';
 import { addDays, fmtDate, fmtWeekday, startOfWeek, today } from '../dates';
 import PeriodNav from './PeriodNav';
 import ReactionBar from './ReactionBar';
+import DeletedBanner from './DeletedBanner';
 
 export default function ReportTab({ project, user, onOpenDay, onError }) {
   const [weekStart, setWeekStart] = useState(startOfWeek(today()));
@@ -27,6 +28,8 @@ export default function ReportTab({ project, user, onOpenDay, onError }) {
   }, [weekStart]);
 
   const setReactions = (id, reactions) => setEntries(list => list.map(e => (e.id === id ? { ...e, reactions } : e)));
+  const replace = updated => setEntries(list => list.map(e => (e.id === updated.id ? updated : e)));
+  const drop = id => setEntries(list => list.filter(e => e.id !== id));
 
   return (
     <div className="tab-content">
@@ -56,7 +59,8 @@ export default function ReportTab({ project, user, onOpenDay, onError }) {
               <p className="muted">Keine Einträge</p>
             ) : (
               dayEntries.map(e => (
-                <div key={e.id} className={`report-entry${e.done ? ' done' : ''}`}>
+                <div key={e.id} className={`report-entry${e.done ? ' done' : ''}${e.deleted_at ? ' deleted' : ''}`}>
+                  {e.deleted_at && <DeletedBanner entry={e} onRestored={replace} onPurged={drop} onError={onError} />}
                   <div className="report-entry-head">
                     {e.done ? <CheckCircle2 size={18} className="ok" /> : <Circle size={18} className="muted" />}
                     {e.entry_time && <span className="time">{e.entry_time}</span>}
@@ -69,7 +73,7 @@ export default function ReportTab({ project, user, onOpenDay, onError }) {
                       <b>Hindernisse:</b> {e.obstacles}
                     </p>
                   )}
-                  <ReactionBar entry={e} onChange={setReactions} onError={onError} />
+                  {!e.deleted_at && <ReactionBar entry={e} onChange={setReactions} onError={onError} />}
                 </div>
               ))
             )}

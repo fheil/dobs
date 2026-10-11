@@ -4,7 +4,7 @@ import { api } from '../../api';
 import ConfirmDialog from '../ConfirmDialog';
 
 let tempKey = 0;
-const toRow = p => ({ key: `p${p.id}`, id: p.id, name: p.name, saved: p.name, entry_count: p.entry_count });
+const toRow = p => ({ key: `p${p.id}`, id: p.id, name: p.name, saved: p.name, entry_count: p.entry_count, deleted_count: p.deleted_count });
 
 // One editable line per project; saves on blur. New lines are created on the
 // server once they get a name.
@@ -39,7 +39,7 @@ export default function ProjectsSection({ onProjectsChanged }) {
         method: row.id ? 'PUT' : 'POST',
         body: JSON.stringify({ name })
       });
-      update(row.key, { id: saved.id, name: saved.name, saved: saved.name, entry_count: saved.entry_count });
+      update(row.key, { id: saved.id, name: saved.name, saved: saved.name, entry_count: saved.entry_count, deleted_count: saved.deleted_count });
       onProjectsChanged();
     } catch (e) {
       setError(e.message);
@@ -69,7 +69,7 @@ export default function ProjectsSection({ onProjectsChanged }) {
   return (
     <>
       <h2>Projekte</h2>
-      <p className="muted">Projekte mit Einträgen können nicht gelöscht werden.</p>
+      <p className="muted">Projekte mit Einträgen können nicht gelöscht werden – auch gelöschte Einträge zählen, bis ein Admin sie endgültig entfernt.</p>
       {error && <p className="error">{error}</p>}
 
       <div className="project-rows">
@@ -88,7 +88,9 @@ export default function ProjectsSection({ onProjectsChanged }) {
               className="icon danger"
               onMouseDown={e => e.preventDefault()}
               disabled={row.entry_count > 0}
-              title={row.entry_count > 0 ? `Enthält ${row.entry_count} Einträge – Löschen nicht möglich` : 'Projekt löschen'}
+              title={row.entry_count > 0
+                ? `Enthält ${row.entry_count} Einträge${row.deleted_count ? ` (davon ${row.deleted_count} gelöscht – erst endgültig entfernen)` : ''} – Löschen nicht möglich`
+                : 'Projekt löschen'}
               onClick={() => (row.id ? setConfirmRow(row) : remove(row))}
             >
               <Trash2 size={18} />

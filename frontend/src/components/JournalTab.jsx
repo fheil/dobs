@@ -13,10 +13,12 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
   const [newId, setNewId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const load = () => api(`/entries?project_id=${project.id}&from=${date}&to=${date}`);
+
   useEffect(() => {
     let cancelled = false;
     setSelectedId(null);
-    api(`/entries?project_id=${project.id}&from=${date}&to=${date}`)
+    load()
       .then(list => { if (!cancelled) setEntries(list); })
       .catch(e => onError(e.message));
     return () => { cancelled = true; };
@@ -46,21 +48,26 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
   };
 
   const setReactions = (id, reactions) => setEntries(list => list.map(e => (e.id === id ? { ...e, reactions } : e)));
+  const replace = updated => setEntries(list => list.map(e => (e.id === updated.id ? updated : e)));
+  const drop = id => setEntries(list => list.filter(e => e.id !== id));
 
   const remove = async () => {
+    setConfirmDelete(false);
     try {
       await api(`/entries/${selectedId}`, { method: 'DELETE' });
-      setEntries(list => list.filter(e => e.id !== selectedId));
       setSelectedId(null);
+      // Reload: admins may keep seeing the entry (as deleted), others don't.
+      setEntries(await load());
     } catch (e) {
       onError(e.message);
-    } finally {
-      setConfirmDelete(false);
     }
   };
 
   const selected = entries.find(e => e.id === selectedId);
-  const canDelete = canWrite && selected?.user_id === user.id;
+  const canDelete = !!selected?.permissions.canDelete;
+  const deleteTitle = !selected
+    ? 'Zum Löschen erst eine Kachel anklicken'
+    : selected.permissions.deleteBlocked || 'Ausgewählten Eintrag löschen';
   const hasOtherAuthors = entries.some(e => e.user_id !== user.id);
 
   return (
@@ -87,29 +94,32 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
         <div className="tiles">
           {entries.map(entry => (
             <EntryTile
-              key={entry.id}
+              key={`${entry.id}:${entry.deleted_at || ''}`}
               entry={entry}
-              readOnly={!canWrite || entry.user_id !== user.id}
               showAuthor={hasOtherAuthors}
               selected={entry.id === selectedId}
               autoFocus={entry.id === newId}
               onSelect={setSelectedId}
               onSave={save}
               onReactions={setReactions}
+              onRestored={replace}
+              onPurged={drop}
               onError={onError}
             />
           ))}
         </div>
       )}
 
-      {canWrite && <div className="tile-actions">
-        <button type="button" className="primary round" title="Neuer Eintrag" onClick={add}>
-          <Plus size={22} />
-        </button>
+      {(canWrite || user.admin) && <div className="tile-actions">
+        {canWrite && (
+          <button type="button" className="primary round" title="Neuer Eintrag" onClick={add}>
+            <Plus size={22} />
+          </button>
+        )}
         <button
           type="button"
           className="primary round danger"
-          title={canDelete ? 'Ausgewählten Eintrag löschen' : 'Zum Löschen erst eine eigene Kachel anklicken'}
+          title={deleteTitle}
           disabled={!canDelete}
           onMouseDown={e => e.preventDefault()}
           onClick={() => setConfirmDelete(true)}
@@ -120,7 +130,9 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
 
       {confirmDelete && canDelete && (
         <ConfirmDialog
-          message={`Eintrag „${selected.title || 'ohne Titel'}“ wirklich löschen?`}
+          message={selected.user_id === user.id
+            ? `Eintrag „${selected.title || 'ohne Titel'}“ löschen? Ein Admin kann ihn wiederherstellen.`
+            : `Eintrag „${selected.title || 'ohne Titel'}“ von ${selected.username} als Admin löschen? Er lässt sich wiederherstellen.`}
           onConfirm={remove}
           onCancel={() => setConfirmDelete(false)}
         />

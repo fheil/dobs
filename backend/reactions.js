@@ -44,6 +44,23 @@ export function reactionsFor(entryIds, userId) {
   return result;
 }
 
+// How many ratings/reactions each entry has from users other than its
+// author - those are what lock an entry against deleting/editing.
+export function othersReactionCounts(entryIds) {
+  const result = new Map(entryIds.map(id => [id, 0]));
+  if (!entryIds.length) return result;
+  for (const r of db.prepare(`
+    SELECT e.id, count(*) AS n FROM entries e
+    JOIN (SELECT entry_id, user_id FROM entry_ratings UNION ALL SELECT entry_id, user_id FROM entry_reactions) x
+      ON x.entry_id = e.id AND x.user_id <> e.user_id
+    WHERE e.id IN (SELECT value FROM json_each(?))
+    GROUP BY e.id
+  `).all(JSON.stringify(entryIds))) {
+    result.set(r.id, r.n);
+  }
+  return result;
+}
+
 export function withReactions(rows, userId) {
   const map = reactionsFor(rows.map(r => r.id), userId);
   return rows.map(r => ({ ...r, reactions: map.get(r.id) }));

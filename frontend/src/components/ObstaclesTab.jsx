@@ -3,6 +3,7 @@ import { ArrowDownUp, PartyPopper } from 'lucide-react';
 import { api } from '../api';
 import { daysBetween, fmtDate, today } from '../dates';
 import ReactionBar from './ReactionBar';
+import DeletedBanner from './DeletedBanner';
 
 const openSince = iso => {
   const n = daysBetween(iso, today());
@@ -34,6 +35,8 @@ export default function ObstaclesTab({ project, user, onOpenDay, onError }) {
   };
 
   const setReactions = (id, reactions) => setEntries(list => list.map(e => (e.id === id ? { ...e, reactions } : e)));
+  const replace = updated => setEntries(list => list.map(e => (e.id === updated.id ? updated : e)));
+  const drop = id => setEntries(list => list.filter(e => e.id !== id));
 
   return (
     <div className="tab-content">
@@ -57,8 +60,9 @@ export default function ObstaclesTab({ project, user, onOpenDay, onError }) {
       ) : (
         <div className="obstacle-list">
           {entries.map(e => (
-            <div key={e.id} className="obstacle-item">
+            <div key={e.id} className={`obstacle-item${e.deleted_at ? ' deleted' : ''}`}>
               <div className="obstacle-main">
+                {e.deleted_at && <DeletedBanner entry={e} onRestored={replace} onPurged={drop} onError={onError} />}
                 <div className="obstacle-meta">
                   <button type="button" className="link" title="Im Journal öffnen" onClick={() => onOpenDay(e.entry_date)}>
                     {fmtDate(e.entry_date)}{e.entry_time && `, ${e.entry_time}`}
@@ -68,9 +72,9 @@ export default function ObstaclesTab({ project, user, onOpenDay, onError }) {
                 </div>
                 <strong>{e.title || 'Ohne Titel'}</strong>
                 <p className="pre">{e.obstacles}</p>
-                <ReactionBar entry={e} onChange={setReactions} onError={onError} />
+                {!e.deleted_at && <ReactionBar entry={e} onChange={setReactions} onError={onError} />}
               </div>
-              {project.role === 'write' && e.user_id === user.id && (
+              {e.permissions.canEdit && (
                 <label className="check">
                   <input type="checkbox" checked={false} onChange={() => markDone(e.id)} />
                   Erledigt

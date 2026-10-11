@@ -1184,3 +1184,67 @@ main {
 .histogram-count {
   color: var(--slate-400);
 }
+
+/* ===== DELETED / LOCKED ENTRIES ===== */
+.tile.deleted,
+.report-entry.deleted,
+.obstacle-item.deleted {
+  opacity: 0.75;
+  background: repeating-linear-gradient(135deg, #fff 0 12px, #f8fafc 12px 24px);
+}
+
+.obstacle-item.deleted {
+  border-left-color: var(--slate-400);
+}
+
+.deleted-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.85rem;
+}
+
+.deleted-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.secondary.danger-text {
+  color: #be123c;
+}
+
+.lock-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: #92400e;
+}
+
+.switch-row {
+  gap: 1rem;
+}
+
+.switch-row b {
+  display: block;
+  font-weight: 600;
+}
+
+.switch-row small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--slate-400);
+}
+
+.switch-row.inactive b {
+  color: var(--slate-400);
+}

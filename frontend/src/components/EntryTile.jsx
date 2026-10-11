@@ -1,13 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Lock } from 'lucide-react';
 import ReactionBar from './ReactionBar';
+import DeletedBanner from './DeletedBanner';
 
 const EDITABLE = ['title', 'content', 'obstacles', 'entry_date', 'entry_time', 'done'];
 
 // One journal entry as an inline-editable tile. Text fields save on blur,
-// date/time/checkbox save on change. Read-only for other users' entries and
-// for read-only project members.
-export default function EntryTile({ entry, readOnly, showAuthor, selected, autoFocus, onSelect, onSave, onReactions, onError }) {
+// date/time/checkbox save on change. What is editable comes from the
+// server-computed entry.permissions.
+export default function EntryTile({ entry, showAuthor, selected, autoFocus, onSelect, onSave, onReactions, onRestored, onPurged, onError }) {
   const [draft, setDraft] = useState(entry);
+  const deleted = !!entry.deleted_at;
+  const { canEdit, contentLocked } = entry.permissions;
+  // readOnly: nothing editable; fieldsLocked: everything except "Erledigt".
+  const readOnly = !canEdit;
+  const fieldsLocked = readOnly || contentLocked;
   const titleRef = useRef(null);
 
   useEffect(() => {
@@ -32,10 +39,11 @@ export default function EntryTile({ entry, readOnly, showAuthor, selected, autoF
 
   return (
     <div
-      className={`tile${selected ? ' selected' : ''}${draft.done ? ' done' : ''}${readOnly ? ' readonly' : ''}`}
+      className={`tile${selected ? ' selected' : ''}${draft.done ? ' done' : ''}${fieldsLocked ? ' readonly' : ''}${deleted ? ' deleted' : ''}`}
       onMouseDown={() => onSelect(entry.id)}
       onFocusCapture={() => onSelect(entry.id)}
     >
+      {deleted && <DeletedBanner entry={entry} onRestored={onRestored} onPurged={onPurged} onError={onError} />}
       <div className="tile-head">
         <input
           ref={titleRef}
@@ -44,7 +52,7 @@ export default function EntryTile({ entry, readOnly, showAuthor, selected, autoF
           value={draft.title}
           onChange={e => set('title', e.target.value)}
           onBlur={commitField('title')}
-          readOnly={readOnly}
+          readOnly={fieldsLocked}
         />
         {showAuthor && <span className="author">{entry.username}</span>}
         <label className="check">
@@ -64,7 +72,7 @@ export default function EntryTile({ entry, readOnly, showAuthor, selected, autoF
           <input
             type="date"
             required
-            readOnly={readOnly}
+            readOnly={fieldsLocked}
             value={draft.entry_date}
             onChange={e => {
               set('entry_date', e.target.value);
@@ -76,7 +84,7 @@ export default function EntryTile({ entry, readOnly, showAuthor, selected, autoF
           Uhrzeit
           <input
             type="time"
-            readOnly={readOnly}
+            readOnly={fieldsLocked}
             value={draft.entry_time}
             onChange={e => set('entry_time', e.target.value)}
             onBlur={commitField('entry_time')}
@@ -89,7 +97,7 @@ export default function EntryTile({ entry, readOnly, showAuthor, selected, autoF
         <textarea
           rows={3}
           placeholder="Was wurde erledigt?"
-          readOnly={readOnly}
+          readOnly={fieldsLocked}
           value={draft.content}
           onChange={e => set('content', e.target.value)}
           onBlur={commitField('content')}
@@ -101,13 +109,18 @@ export default function EntryTile({ entry, readOnly, showAuthor, selected, autoF
         <textarea
           rows={2}
           placeholder="Was stand im Weg?"
-          readOnly={readOnly}
+          readOnly={fieldsLocked}
           value={draft.obstacles}
           onChange={e => set('obstacles', e.target.value)}
           onBlur={commitField('obstacles')}
         />
       </label>
-      <ReactionBar entry={{ ...entry, obstacles: draft.obstacles }} onChange={onReactions} onError={onError} />
+      {contentLocked && (
+        <p className="lock-hint">
+          <Lock size={14} /> Andere haben reagiert – nur „Erledigt“ lässt sich noch ändern.
+        </p>
+      )}
+      {!deleted && <ReactionBar entry={{ ...entry, obstacles: draft.obstacles }} onChange={onReactions} onError={onError} />}
     </div>
   );
 }

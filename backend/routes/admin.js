@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import db from '../db.js';
 import { authenticate, requireAdmin } from '../auth-middleware.js';
+import { getSettings, updateSettings } from '../settings.js';
 
 const router = Router();
 router.use(authenticate, requireAdmin);
@@ -22,10 +23,21 @@ router.put('/users/:id/admin', (req, res) => {
   res.json({ id: targetId, admin: !!req.body?.admin });
 });
 
+// ----- Löschen & Sperren -----
+
+router.get('/settings', (_req, res) => {
+  res.json(getSettings());
+});
+
+router.put('/settings', (req, res) => {
+  res.json(updateSettings(req.body || {}));
+});
+
 // ----- Projekte -----
 
 const projectRow = id => db.prepare(`
-  SELECT p.id, p.name, (SELECT count(*) FROM entries e WHERE e.project_id = p.id) AS entry_count
+  SELECT p.id, p.name, (SELECT count(*) FROM entries e WHERE e.project_id = p.id) AS entry_count,
+    (SELECT count(*) FROM entries e WHERE e.project_id = p.id AND e.deleted_at IS NOT NULL) AS deleted_count
   FROM projects p WHERE p.id = ?
 `).get(id);
 
@@ -38,7 +50,8 @@ const uniqueError = (e, res) => {
 
 router.get('/projects', (_req, res) => {
   res.json(db.prepare(`
-    SELECT p.id, p.name, (SELECT count(*) FROM entries e WHERE e.project_id = p.id) AS entry_count
+    SELECT p.id, p.name, (SELECT count(*) FROM entries e WHERE e.project_id = p.id) AS entry_count,
+    (SELECT count(*) FROM entries e WHERE e.project_id = p.id AND e.deleted_at IS NOT NULL) AS deleted_count
     FROM projects p ORDER BY p.id
   `).all());
 });
@@ -71,7 +84,7 @@ router.delete('/projects/:id', (req, res) => {
   const project = projectRow(req.params.id);
   if (!project) return res.status(404).json({ error: 'Projekt nicht gefunden.' });
   if (project.entry_count > 0) {
-    return res.status(409).json({ error: 'Projekte mit Einträgen können nicht gelöscht werden.' });
+    return res.status(409).json({ error: 'Projekte mit Einträgen können nicht gelöscht werden (auch gelöschte Einträge zählen, bis ein Admin sie endgültig entfernt).' });
   }
   db.prepare('DELETE FROM projects WHERE id = ?').run(req.params.id);
   res.json({ deleted: 1 });

@@ -4,6 +4,7 @@ import MembersSection from './settings/MembersSection';
 import AdminsSection from './settings/AdminsSection';
 import ProjectsSection from './settings/ProjectsSection';
 import WeekSection from './settings/WeekSection';
+import DeleteSection from './settings/DeleteSection';
 
 export default function SettingsTab({ user, onProjectsChanged }) {
   const sections = [
@@ -12,7 +13,8 @@ export default function SettingsTab({ user, onProjectsChanged }) {
     ...(user.admin ? [
       { key: 'members', label: 'Projektzuordnung' },
       { key: 'projects', label: 'Projekte' },
-      { key: 'admins', label: 'Admin-Rechte' }
+      { key: 'admins', label: 'Admin-Rechte' },
+      { key: 'delete', label: 'Löschen & Sperren' }
     ] : [])
   ];
   const [active, setActive] = useState('password');
@@ -38,6 +40,7 @@ export default function SettingsTab({ user, onProjectsChanged }) {
         {active === 'projects' && <ProjectsSection onProjectsChanged={onProjectsChanged} />}
         {active === 'admins' && <AdminsSection user={user} />}
         {active === 'week' && <WeekSection />}
+        {active === 'delete' && <DeleteSection />}
       </div>
     </div>
   );

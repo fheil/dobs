@@ -48,9 +48,24 @@ CREATE TABLE IF NOT EXISTS entries (
   content TEXT NOT NULL DEFAULT '',
   obstacles TEXT NOT NULL DEFAULT '',
   done INTEGER NOT NULL DEFAULT 0,
+  -- Deleting only archives: hidden from everyone, restorable by admins.
+  deleted_at TEXT,
+  deleted_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+-- App-wide rules for deleting/locking entries (single row, set by admins).
+CREATE TABLE IF NOT EXISTS app_settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  delete_allowed INTEGER NOT NULL DEFAULT 1,
+  delete_done_allowed INTEGER NOT NULL DEFAULT 0,
+  delete_reacted_allowed INTEGER NOT NULL DEFAULT 0,
+  lock_reacted INTEGER NOT NULL DEFAULT 1,
+  admins_see_deleted INTEGER NOT NULL DEFAULT 1
+);
+
+INSERT OR IGNORE INTO app_settings (id) VALUES (1);
 `);
 
 // Per-user feedback on entries from anyone with (at least) read access:
@@ -84,6 +99,9 @@ for (const col of ['report_start_day INTEGER NOT NULL DEFAULT 0', 'report_end_da
 }
 // The report week used to be a global setting.
 db.exec('DROP TABLE IF EXISTS config');
+for (const col of ['deleted_at TEXT', 'deleted_by INTEGER REFERENCES users(id) ON DELETE SET NULL']) {
+  if (!columns('entries').includes(col.split(' ')[0])) db.exec(`ALTER TABLE entries ADD COLUMN ${col}`);
+}
 if (!columns('entries').includes('project_id')) {
   db.exec('ALTER TABLE entries ADD COLUMN project_id INTEGER REFERENCES projects(id) ON DELETE RESTRICT');
 }
