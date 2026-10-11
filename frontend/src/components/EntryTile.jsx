@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ReactionBar from './ReactionBar';
 
 const EDITABLE = ['title', 'content', 'obstacles', 'entry_date', 'entry_time', 'done'];
 
 // One journal entry as an inline-editable tile. Text fields save on blur,
 // date/time/checkbox save on change. Read-only for other users' entries and
 // for read-only project members.
-export default function EntryTile({ entry, readOnly, showAuthor, selected, autoFocus, onSelect, onSave }) {
+export default function EntryTile({ entry, readOnly, showAuthor, selected, autoFocus, onSelect, onSave, onReactions, onError }) {
   const [draft, setDraft] = useState(entry);
   const titleRef = useRef(null);
 
@@ -106,6 +107,7 @@ export default function EntryTile({ entry, readOnly, showAuthor, selected, autoF
           onBlur={commitField('obstacles')}
         />
       </label>
+      <ReactionBar entry={{ ...entry, obstacles: draft.obstacles }} onChange={onReactions} onError={onError} />
     </div>
   );
 }

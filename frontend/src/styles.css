@@ -1014,3 +1014,173 @@ main {
   color: var(--accent-900);
   font-weight: 700;
 }
+
+/* ===== REACTIONS: shocked / stars / help ===== */
+.reaction-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+}
+
+.report-entry .reaction-bar {
+  margin: 0.4rem 0 0 1.6rem;
+}
+
+.reaction-toggle,
+.star,
+.reaction-link {
+  background: none;
+  border: none;
+  padding: 0.2rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--slate-400);
+  transition: all 0.15s;
+}
+
+.reaction-toggle:hover,
+.reaction-link:hover {
+  background: var(--slate-100);
+}
+
+.reaction-toggle .count,
+.reaction-link.count {
+  font-weight: 700;
+  color: var(--slate-700);
+}
+
+.reaction-toggle span[aria-hidden] {
+  font-size: 1.15rem;
+  line-height: 1;
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.reaction-toggle.on span[aria-hidden] {
+  filter: none;
+  opacity: 1;
+}
+
+.reaction-toggle.shocked.on {
+  background: #fef3c7;
+}
+
+.reaction-toggle.help.on {
+  background: var(--accent-50);
+}
+
+.stars {
+  display: inline-flex;
+}
+
+.star {
+  padding: 0.1rem;
+  color: #cbd5e1;
+}
+
+.star.filled {
+  color: #f59e0b;
+}
+
+.star.filled svg {
+  fill: currentColor;
+}
+
+.star.preview.filled {
+  color: #fbbf24;
+}
+
+.star:hover {
+  transform: scale(1.15);
+}
+
+.rating-avg {
+  font-weight: 700;
+  color: var(--slate-700);
+}
+
+.reaction-link.rating-avg:hover {
+  text-decoration: underline;
+}
+
+.help-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.popover-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  min-width: 180px;
+  box-shadow: 0 12px 30px -8px rgba(15, 23, 42, 0.3);
+  border: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--slate-700);
+  cursor: default;
+}
+
+.popover-title {
+  margin: 0 0 0.4rem;
+  font-weight: 700;
+}
+
+.name-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.histogram {
+  min-width: 250px;
+}
+
+.histogram-head {
+  margin: 0 0 0.6rem;
+}
+
+.histogram-row {
+  display: grid;
+  grid-template-columns: 4.2rem 1fr 2.8rem 2rem;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.3rem 0;
+  white-space: nowrap;
+}
+
+.histogram-bar {
+  height: 14px;
+  background: var(--slate-100);
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.histogram-bar span {
+  display: block;
+  height: 100%;
+  background: #f59e0b;
+}
+
+.histogram-pct {
+  text-align: right;
+  font-weight: 600;
+}
+
+.histogram-count {
+  color: var(--slate-400);
+}

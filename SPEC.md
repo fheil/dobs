@@ -43,6 +43,22 @@ dabei aufgetreten sind. Mehrere Benutzer arbeiten in gemeinsamen Projekten.
 Ein Hindernis gilt als gelöst, sobald „Erledigt“ gesetzt ist (kein eigenes
 Feld dafür).
 
+## Bewertungen und Reaktionen
+
+Jeder mit mindestens Leserechten auf das Projekt kann auf einen Eintrag
+reagieren (auch auf eigene). Die Leiste steht unter jedem Eintrag in
+Journal, Report und Hindernisse:
+
+- **😱 Sehr verwundert über das Hindernis:** an/aus pro Benutzer, mit
+  Anzahl; nur bei Einträgen mit Hindernis.
+- **1–5 Sterne:** eine Bewertung pro Benutzer, nur die eigene änderbar;
+  erneuter Klick auf den gesetzten Stern nimmt sie zurück.
+- **Durchschnitt in %** (Ø Sterne / 5) mit Anzahl der Bewertungen. Klick
+  öffnet ein kleines Fenster mit der Verteilung wie bei Amazon: je
+  Sternzahl Balken, Anteil in % und Anzahl.
+- **🙋 Hilfe anbieten:** an/aus pro Benutzer. Klick auf die Anzahl zeigt die
+  Namen derer, die Hilfe anbieten.
+
 ## Tab 1 – Journal
 
 - Eine Seite pro Tag, mit vor/zurück-Buttons und „Heute“-Button.

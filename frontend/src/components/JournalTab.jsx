@@ -45,6 +45,8 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
     }
   };
 
+  const setReactions = (id, reactions) => setEntries(list => list.map(e => (e.id === id ? { ...e, reactions } : e)));
+
   const remove = async () => {
     try {
       await api(`/entries/${selectedId}`, { method: 'DELETE' });
@@ -93,6 +95,8 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
               autoFocus={entry.id === newId}
               onSelect={setSelectedId}
               onSave={save}
+              onReactions={setReactions}
+              onError={onError}
             />
           ))}
         </div>

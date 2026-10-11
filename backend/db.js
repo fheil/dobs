@@ -60,6 +60,27 @@ CREATE TABLE IF NOT EXISTS entries (
 );
 `);
 
+// Per-user feedback on entries from anyone with (at least) read access:
+// one 1-5 star rating each, plus toggles 'shocked' (very surprised by the
+// obstacle) and 'help' (offers help).
+db.exec(`
+CREATE TABLE IF NOT EXISTS entry_ratings (
+  entry_id INTEGER NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  stars INTEGER NOT NULL CHECK (stars BETWEEN 1 AND 5),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (entry_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS entry_reactions (
+  entry_id INTEGER NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL CHECK (kind IN ('shocked', 'help')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (entry_id, user_id, kind)
+);
+`);
+
 // Migration for databases created before projects/admin existed.
 const columns = table => db.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
 if (!columns('users').includes('admin')) {

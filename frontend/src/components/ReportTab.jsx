@@ -3,6 +3,7 @@ import { CheckCircle2, Circle } from 'lucide-react';
 import { api } from '../api';
 import { addDays, fmtDate, fmtWeekday, startOfWeek, today } from '../dates';
 import PeriodNav from './PeriodNav';
+import ReactionBar from './ReactionBar';
 
 export default function ReportTab({ project, user, onOpenDay, onError }) {
   const [weekStart, setWeekStart] = useState(startOfWeek(today()));
@@ -24,6 +25,8 @@ export default function ReportTab({ project, user, onOpenDay, onError }) {
       .catch(e => onError(e.message));
     return () => { cancelled = true; };
   }, [weekStart]);
+
+  const setReactions = (id, reactions) => setEntries(list => list.map(e => (e.id === id ? { ...e, reactions } : e)));
 
   return (
     <div className="tab-content">
@@ -66,6 +69,7 @@ export default function ReportTab({ project, user, onOpenDay, onError }) {
                       <b>Hindernisse:</b> {e.obstacles}
                     </p>
                   )}
+                  <ReactionBar entry={e} onChange={setReactions} onError={onError} />
                 </div>
               ))
             )}

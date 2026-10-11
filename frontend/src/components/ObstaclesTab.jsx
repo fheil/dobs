@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowDownUp, PartyPopper } from 'lucide-react';
 import { api } from '../api';
 import { daysBetween, fmtDate, today } from '../dates';
+import ReactionBar from './ReactionBar';
 
 const openSince = iso => {
   const n = daysBetween(iso, today());
@@ -31,6 +32,8 @@ export default function ObstaclesTab({ project, user, onOpenDay, onError }) {
       onError(e.message);
     }
   };
+
+  const setReactions = (id, reactions) => setEntries(list => list.map(e => (e.id === id ? { ...e, reactions } : e)));
 
   return (
     <div className="tab-content">
@@ -65,6 +68,7 @@ export default function ObstaclesTab({ project, user, onOpenDay, onError }) {
                 </div>
                 <strong>{e.title || 'Ohne Titel'}</strong>
                 <p className="pre">{e.obstacles}</p>
+                <ReactionBar entry={e} onChange={setReactions} onError={onError} />
               </div>
               {project.role === 'write' && e.user_id === user.id && (
                 <label className="check">

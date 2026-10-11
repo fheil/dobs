@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import db, { roleFor } from '../db.js';
 import { authenticate } from '../auth-middleware.js';
+import { REACTION_KINDS, reactionsFor, withReactions } from '../reactions.js';
 
 const router = Router();
 router.use(authenticate);
@@ -31,7 +32,7 @@ function parseFields(b) {
 
 const SELECT = 'SELECT e.*, u.username FROM entries e JOIN users u ON u.id = e.user_id';
 const toJson = row => row && { ...row, done: !!row.done };
-const byId = id => toJson(db.prepare(`${SELECT} WHERE e.id = ?`).get(id));
+const byId = (id, userId) => withReactions([toJson(db.prepare(`${SELECT} WHERE e.id = ?`).get(id))], userId)[0];
 
 // Every read needs at least read access to ?project_id; sets req.projectId.
 function requireProjectAccess(req, res, next) {
@@ -54,6 +55,14 @@ function loadOwnWritableEntry(req, res, next) {
   next();
 }
 
+// Reacting to an entry only needs read access to its project.
+function loadReadableEntry(req, res, next) {
+  const entry = db.prepare('SELECT id, project_id FROM entries WHERE id = ?').get(req.params.id);
+  if (!entry || !roleFor(req.user.id, entry.project_id)) return res.status(404).json({ error: 'Eintrag nicht gefunden.' });
+  req.entry = entry;
+  next();
+}
+
 // GET /api/entries?project_id=N&from=YYYY-MM-DD&to=YYYY-MM-DD (beide inklusive)
 router.get('/', requireProjectAccess, (req, res) => {
   const { from, to } = req.query;
@@ -63,7 +72,7 @@ router.get('/', requireProjectAccess, (req, res) => {
   const rows = db.prepare(
     `${SELECT} WHERE e.project_id = ? AND e.entry_date BETWEEN ? AND ? ORDER BY e.entry_date, e.entry_time, e.id`
   ).all(req.projectId, from, to);
-  res.json(rows.map(toJson));
+  res.json(withReactions(rows.map(toJson), req.user.id));
 });
 
 // Offene Hindernisse: nicht erledigt und Hindernisse-Feld nicht leer.
@@ -75,7 +84,7 @@ router.get('/obstacles', requireProjectAccess, (req, res) => {
     WHERE e.project_id = ? AND e.done = 0 AND trim(e.obstacles) <> ''
     ORDER BY e.entry_date ${dir}, e.entry_time ${dir}, e.id ${dir}
   `).all(req.projectId);
-  res.json(rows.map(toJson));
+  res.json(withReactions(rows.map(toJson), req.user.id));
 });
 
 router.post('/', (req, res) => {
@@ -100,7 +109,7 @@ router.post('/', (req, res) => {
     values.obstacles ?? '',
     values.done ?? 0
   );
-  res.status(201).json(byId(info.lastInsertRowid));
+  res.status(201).json(byId(info.lastInsertRowid, req.user.id));
 });
 
 router.put('/:id', loadOwnWritableEntry, (req, res) => {
@@ -111,7 +120,35 @@ router.put('/:id', loadOwnWritableEntry, (req, res) => {
 
   db.prepare(`UPDATE entries SET ${keys.map(k => `${k} = ?`).join(', ')}, updated_at = datetime('now') WHERE id = ?`)
     .run(...keys.map(k => values[k]), req.entry.id);
-  res.json(byId(req.entry.id));
+  res.json(byId(req.entry.id, req.user.id));
+});
+
+// Body: { stars: 1..5 } sets the own rating, { stars: null } removes it.
+router.put('/:id/rating', loadReadableEntry, (req, res) => {
+  const stars = req.body?.stars;
+  if (stars === null) {
+    db.prepare('DELETE FROM entry_ratings WHERE entry_id = ? AND user_id = ?').run(req.entry.id, req.user.id);
+  } else if (Number.isInteger(stars) && stars >= 1 && stars <= 5) {
+    db.prepare(`
+      INSERT INTO entry_ratings (entry_id, user_id, stars) VALUES (?, ?, ?)
+      ON CONFLICT (entry_id, user_id) DO UPDATE SET stars = excluded.stars, updated_at = datetime('now')
+    `).run(req.entry.id, req.user.id, stars);
+  } else {
+    return res.status(400).json({ error: 'Bewertung muss 1 bis 5 Sterne sein.' });
+  }
+  res.json(reactionsFor([req.entry.id], req.user.id).get(req.entry.id));
+});
+
+// Body: { active: true | false } - toggles the own 'shocked'/'help' reaction.
+router.put('/:id/reactions/:kind', loadReadableEntry, (req, res) => {
+  const { kind } = req.params;
+  if (!REACTION_KINDS.includes(kind)) return res.status(404).json({ error: 'Unbekannte Reaktion.' });
+  if (req.body?.active) {
+    db.prepare('INSERT OR IGNORE INTO entry_reactions (entry_id, user_id, kind) VALUES (?, ?, ?)').run(req.entry.id, req.user.id, kind);
+  } else {
+    db.prepare('DELETE FROM entry_reactions WHERE entry_id = ? AND user_id = ? AND kind = ?').run(req.entry.id, req.user.id, kind);
+  }
+  res.json(reactionsFor([req.entry.id], req.user.id).get(req.entry.id));
 });
 
 router.delete('/:id', loadOwnWritableEntry, (req, res) => {
