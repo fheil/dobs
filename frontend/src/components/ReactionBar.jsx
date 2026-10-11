@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Star, X } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { api } from '../api';
 import Popover from './Popover';
+
+const ZERO = -1;
 
 const fmtNumber = (n, digits = 1) => n.toLocaleString('de-DE', { maximumFractionDigits: digits });
 
@@ -51,7 +53,21 @@ export default function ReactionBar({ entry, onChange, onError, children }) {
 
   const total = r.ratingCounts.reduce((a, b) => a + b, 0);
   const average = total ? r.ratingCounts.reduce((s, n, i) => s + n * (i + 1), 0) / total : 0;
-  const shown = hover || r.myRating || 0;
+  // hover: 0 = none, ZERO = left part of the first star ("0 Sterne").
+  const shown = hover === ZERO ? 0 : hover || r.myRating || 0;
+
+  // The left third of star 1 means "no stars" - judged by pointer position,
+  // so it works for taps on touch screens too.
+  const starAt = (n, e) => {
+    if (n !== 1) return n;
+    const box = e.currentTarget.getBoundingClientRect();
+    return e.clientX - box.left < box.width / 3 ? ZERO : 1;
+  };
+
+  const rate = n => {
+    if (n === ZERO) return r.myRating && call('/rating', { stars: null });
+    call('/rating', { stars: r.myRating === n ? null : n });
+  };
   const hasObstacle = !!entry.obstacles?.trim();
 
   return (
@@ -75,27 +91,16 @@ export default function ReactionBar({ entry, onChange, onError, children }) {
             key={n}
             type="button"
             className={`star${n <= shown ? ' filled' : ''}${hover ? ' preview' : ''}`}
-            title={r.myRating === n ? 'Bewertung zurücknehmen' : `${n} ${n === 1 ? 'Stern' : 'Sterne'} vergeben`}
+            title={n === 1 ? 'Links am ersten Stern: Bewertung entfernen' : `${n} Sterne vergeben`}
             aria-label={`${n} ${n === 1 ? 'Stern' : 'Sterne'}`}
-            onMouseEnter={() => setHover(n)}
-            onClick={() => call('/rating', { stars: r.myRating === n ? null : n })}
+            onMouseEnter={e => setHover(starAt(n, e))}
+            onMouseMove={n === 1 ? e => setHover(starAt(1, e)) : undefined}
+            onClick={e => rate(starAt(n, e))}
           >
             <Star size={18} />
           </button>
         ))}
       </span>
-      {/* Outside .stars so hovering it doesn't keep the star preview lit. */}
-      {r.myRating && (
-        <button
-          type="button"
-          className="star-clear"
-          title="Meine Bewertung zurücknehmen"
-          aria-label="Meine Bewertung zurücknehmen"
-          onClick={() => call('/rating', { stars: null })}
-        >
-          <X size={14} />
-        </button>
-      )}
 
       {total > 0 ? (
         <Popover

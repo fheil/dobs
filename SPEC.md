@@ -52,8 +52,8 @@ Journal, Report und Hindernisse:
 - **😱 Sehr verwundert über das Hindernis:** an/aus pro Benutzer, mit
   Anzahl; nur bei Einträgen mit Hindernis.
 - **1–5 Sterne:** eine Bewertung pro Benutzer, nur die eigene änderbar;
-  ✕ hinter den Sternen (oder erneuter Klick auf den gesetzten Stern) nimmt
-  sie zurück.
+  ein Klick auf das linke Drittel des ersten Sterns (Vorschau: alle Sterne
+  leer) oder erneut auf den gesetzten Stern nimmt sie zurück.
 - **Durchschnitt in %** (Ø Sterne / 5) mit Anzahl der Bewertungen. Klick
   öffnet ein kleines Fenster mit der Verteilung wie bei Amazon: je
   Sternzahl Balken, Anteil in % und Anzahl.

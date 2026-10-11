@@ -1250,21 +1250,6 @@ main {
   margin: 0;
 }
 
-.star-clear {
-  background: none;
-  border: none;
-  padding: 0.2rem;
-  margin-left: -0.6rem;
-  border-radius: 50%;
-  display: inline-flex;
-  color: var(--slate-400);
-}
-
-.star-clear:hover {
-  background: var(--slate-100);
-  color: var(--rose-500);
-}
-
 .reaction-end {
   margin-left: auto;
   display: inline-flex;
