@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CheckSquare } from 'lucide-react';
-import { api } from '../api';
+import { api, setSession } from '../api';
 
 export default function Auth({ onLogin, error: externalError }) {
   const [register, setRegister] = useState(false);
@@ -22,7 +22,7 @@ export default function Auth({ onLogin, error: externalError }) {
         method: 'POST',
         body: JSON.stringify(form)
       });
-      localStorage.token = d.token;
+      setSession(d.token);
       onLogin(d.user);
     } catch (x) {
       setError(x.message);

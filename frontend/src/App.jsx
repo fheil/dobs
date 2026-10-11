@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, CalendarDays, CheckSquare, FolderX, LogOut, NotebookPen, Settings } from 'lucide-react';
-import { api } from './api';
+import { api, resumeSession, setSession, watchSessionChanges } from './api';
 import { today } from './dates';
 import Auth from './components/Auth';
 import JournalTab from './components/JournalTab';
@@ -128,14 +128,16 @@ function MainApp({ user, logout }) {
 export default function App() {
   const [user, setUser] = useState(null);
   const [authError, setAuthError] = useState('');
-  const [checking, setChecking] = useState(!!localStorage.token);
+  const [checking, setChecking] = useState(() => !!resumeSession());
+
+  useEffect(() => watchSessionChanges(), []);
 
   useEffect(() => {
-    if (!localStorage.token) return;
+    if (!checking) return;
     api('/auth/me')
       .then(d => setUser(d.user))
       .catch(e => {
-        localStorage.removeItem('token');
+        setSession(null);
         setAuthError(e.message);
       })
       .finally(() => setChecking(false));
@@ -150,7 +152,7 @@ export default function App() {
       key={user.id}
       user={user}
       logout={() => {
-        localStorage.removeItem('token');
+        setSession(null);
         setUser(null);
       }}
     />
