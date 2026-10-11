@@ -14,8 +14,22 @@ Docker-Compose, eigenes einfaches Login wie bei paindiary, kein Keycloak).
 - Eigener, einfacher User/Passwort-Login im Backend (wie paindiary),
   kein Keycloak.
 
+## Projekte und Rechte
+
+- Einträge gehören immer zu genau einem Projekt.
+- Im Header neben dem Benutzernamen wählt man das aktive Projekt; Journal,
+  Report und Hindernisse zeigen nur Einträge dieses Projekts. Neue Einträge
+  bekommen das aktive Projekt.
+- Benutzer werden Projekten mit „Lesen“ oder „Lesen+Schreiben“ zugeordnet.
+  Wer zugeordnet ist, sieht alle Einträge des Projekts (mit Autor). Ändern und
+  löschen darf man nur eigene Einträge, und nur mit „Lesen+Schreiben“.
+- Admins verwalten Projekte, Zuordnungen und Admin-Rechte. Der erste
+  registrierte Benutzer wird Admin; den eigenen Admin-Status kann man nicht
+  ändern. Wer ein Projekt anlegt, wird ihm mit „Lesen+Schreiben“ zugeordnet.
+
 ## Datenmodell: Journal-Eintrag
 
+- Projekt
 - Titel
 - Inhalt
 - Hindernisse (Text)
@@ -50,10 +64,22 @@ Ein Hindernis gilt als "gelöst", sobald die Checkbox "Erledigt" gesetzt ist
 
 ## Tab 4 – Einstellungen
 
-- Vorerst nur: Passwort ändern.
+Unterseiten (alle außer der ersten nur für Admins):
+
+1. Passwort ändern.
+2. Projektzuordnung: Benutzern Projekte mit „Lesen“ oder „Lesen+Schreiben“
+   zuordnen.
+3. Admin-Rechte erteilen/entziehen.
+4. Projekte: eine Eingabezeile pro Projektname, darunter `+` für weitere
+   Zeilen, je Zeile ein Mülleimer zum Löschen. Projekte mit Einträgen können
+   nicht gelöscht werden.
+
+## Farben
+
+- Eine Akzentfarbe (`ACCENT_COLOR`, Standard Lime `#65a30d`), alle
+  Abstufungen werden daraus abgeleitet.
 
 ## Status
 
-Noch kein Code vorhanden. Dies ist die Anforderungsgrundlage für die
-Implementierung in einer eigenen Claude-Code-Session mit Arbeitsverzeichnis
-`~/claude/dobs`.
+Erste Implementierung vorhanden (Backend `backend/`, Frontend `frontend/`,
+`docker-compose.yml`). Details zu Betrieb und Konfiguration im README.

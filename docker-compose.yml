@@ -1,0 +1,74 @@
+services:
+  dobs-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dobs-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      # NOTE: frontend/nginx.conf hardcodes "dobs-backend:8050" at build time
+      # and does NOT read this variable. If you change PORT, update nginx.conf too.
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=https://${DOMAIN}
+      - REGISTRATION_ENABLED=${REGISTRATION_ENABLED}
+      - ACCENT_COLOR=${ACCENT_COLOR}
+    volumes:
+      - ${BASE_DIR}/${BINDS}/data:/app/data
+    networks:
+      - traefik-net
+    expose:
+      - "${PORT}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dobs-api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.dobs-api.entrypoints=websecure"
+      - "traefik.http.routers.dobs-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.dobs-api.loadbalancer.server.port=${PORT}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT}/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  dobs-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dobs-frontend
+    restart: unless-stopped
+    networks:
+      - traefik-net
+    expose:
+      - "80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dobs.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.dobs.entrypoints=websecure"
+      - "traefik.http.routers.dobs.tls.certresolver=letsencrypt"
+      - "traefik.http.services.dobs.loadbalancer.server.port=80"
+      - "traefik.http.routers.dobs.priority=1"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      - dobs-backend
+
+  dobs-sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: dobs-sqlite-web
+    restart: always
+    profiles: ["tools"]
+    user: "999:999"
+    command: sqlite_web -H 0.0.0.0 -x /data/dobs.db
+    ports:
+      - "127.0.0.1:${SQLITE_WEB_PORT}:8080"
+    volumes:
+      - ${BASE_DIR}/${BINDS}/data:/data
+
+networks:
+  traefik-net:
+    external: true
