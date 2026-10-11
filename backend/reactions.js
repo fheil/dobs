@@ -1,14 +1,14 @@
 import db from './db.js';
 
-export const REACTION_KINDS = ['shocked', 'help'];
+export const REACTION_KINDS = ['shocked', 'support'];
 
 const empty = () => ({
   ratingCounts: [0, 0, 0, 0, 0], // index 0 = 1 Stern ... index 4 = 5 Sterne
   myRating: null,
   shocked: [],                   // usernames
   myShocked: false,
-  help: [],                      // usernames
-  myHelp: false
+  support: [],                   // usernames
+  mySupport: false
 });
 
 // Ratings/reactions for many entries in three queries. Ids are passed as a
@@ -38,7 +38,7 @@ export function reactionsFor(entryIds, userId) {
   `).all(ids)) {
     const entry = result.get(r.entry_id);
     entry[r.kind].push(r.username);
-    if (r.user_id === userId) entry[r.kind === 'shocked' ? 'myShocked' : 'myHelp'] = true;
+    if (r.user_id === userId) entry[r.kind === 'shocked' ? 'myShocked' : 'mySupport'] = true;
   }
 
   return result;

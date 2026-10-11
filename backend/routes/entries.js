@@ -139,7 +139,7 @@ router.put('/:id/rating', loadReadableEntry, (req, res) => {
   res.json(reactionsFor([req.entry.id], req.user.id).get(req.entry.id));
 });
 
-// Body: { active: true | false } - toggles the own 'shocked'/'help' reaction.
+// Body: { active: true | false } - toggles the own 'shocked'/'support' reaction.
 router.put('/:id/reactions/:kind', loadReadableEntry, (req, res) => {
   const { kind } = req.params;
   if (!REACTION_KINDS.includes(kind)) return res.status(404).json({ error: 'Unbekannte Reaktion.' });

@@ -97,25 +97,25 @@ export default function ReactionBar({ entry, onChange, onError }) {
         <span className="rating-avg muted">noch keine Bewertung</span>
       )}
 
-      <span className="help-group">
+      <span className="support-group">
         <button
           type="button"
-          className={`reaction-toggle help${r.myHelp ? ' on' : ''}`}
-          title={r.myHelp ? 'Unterstützungsangebot zurückziehen' : 'Unterstützung anbieten'}
-          aria-pressed={r.myHelp}
-          onClick={() => call('/reactions/help', { active: !r.myHelp })}
+          className={`reaction-toggle support${r.mySupport ? ' on' : ''}`}
+          title={r.mySupport ? 'Unterstützungsangebot zurückziehen' : 'Unterstützung anbieten'}
+          aria-pressed={r.mySupport}
+          onClick={() => call('/reactions/support', { active: !r.mySupport })}
         >
           <span aria-hidden="true">🙋</span>
         </button>
-        {r.help.length > 0 && (
+        {r.support.length > 0 && (
           <Popover
             className="count"
             title="Wer Unterstützung anbietet"
-            label={r.help.length}
+            label={r.support.length}
           >
             <p className="popover-title">Bieten Unterstützung an:</p>
             <ul className="name-list">
-              {r.help.map(name => <li key={name}>{name}</li>)}
+              {r.support.map(name => <li key={name}>{name}</li>)}
             </ul>
           </Popover>
         )}

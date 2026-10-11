@@ -1015,7 +1015,7 @@ main {
   font-weight: 700;
 }
 
-/* ===== REACTIONS: shocked / stars / help ===== */
+/* ===== REACTIONS: shocked / stars / support ===== */
 .reaction-bar {
   display: flex;
   flex-wrap: wrap;
@@ -1070,7 +1070,7 @@ main {
   background: #fef3c7;
 }
 
-.reaction-toggle.help.on {
+.reaction-toggle.support.on {
   background: var(--accent-50);
 }
 
@@ -1108,7 +1108,7 @@ main {
   text-decoration: underline;
 }
 
-.help-group {
+.support-group {
   display: inline-flex;
   align-items: center;
 }
