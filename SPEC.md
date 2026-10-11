@@ -6,7 +6,8 @@ dabei aufgetreten sind. Mehrere Benutzer arbeiten in gemeinsamen Projekten.
 ## Betrieb
 
 - Selbst gehostet per Docker Compose: Backend (Node.js, SQLite) und
-  Frontend (React, ausgeliefert über nginx), hinter einem Reverse Proxy.
+  Frontend (React, ausgeliefert über nginx), hinter Traefik. Alternativ
+  ohne Traefik, mit dem Frontend direkt auf einem Host-Port (nur HTTP).
 - Konfiguration über Umgebungsvariablen, soweit möglich.
 - Datenverzeichnis als Bind-Mount (`${BASE_DIR}/${BINDS}/data`), keine
   benannten Docker-Volumes.

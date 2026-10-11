@@ -31,6 +31,14 @@ nur per SSH-Tunnel nutzen).
 | `ACCENT_COLOR` | Akzentfarbe als `#rrggbb` (Standard `#65a30d`, Lime); alle Abstufungen werden daraus berechnet. Wird zur Laufzeit gelesen – Neustart reicht, kein Rebuild |
 | `COMPOSE_PROFILES`, `SQLITE_WEB_PORT` | `tools` startet zusätzlich sqlite-web (ohne Login, nur lokal binden) |
 
+### Ohne Traefik
+
+`docker-compose.standalone.yml` startet dobs ohne Traefik: Das Frontend ist
+direkt unter `http://<server>:${PORT}` erreichbar (nur HTTP – für HTTPS einen
+eigenen Reverse Proxy davorsetzen). Gleiche Variablen wie oben, `DOMAIN`
+entfällt; `PORT` ist hier der Port auf dem Server. In Portainer beim
+Repository-Stack einfach diese Datei als „Compose path“ angeben.
+
 ## Entwicklung
 
 ```sh
