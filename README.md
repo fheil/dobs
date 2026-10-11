@@ -14,7 +14,8 @@ docker compose up -d --build
 ```
 
 Die Datenbank liegt unter `${BASE_DIR}/${BINDS}/data/dobs.db`. Der erste
-registrierte Benutzer wird automatisch Admin.
+registrierte Benutzer wird automatisch Admin; danach lässt sich die
+Registrierung unter Einstellungen → Registrierung abschalten.
 
 dobs bringt einen eigenen sqlite-web-Container (`dobs-sqlite-web`) mit, der
 nur die dobs-Datenbank sieht. Er startet nur mit `COMPOSE_PROFILES=tools` und
@@ -27,7 +28,6 @@ nur per SSH-Tunnel nutzen).
 | `JWT_SECRET` | Geheimnis zum Signieren der Login-Tokens |
 | `PORT` | Backend-Port (Standard 8050; bei Änderung auch `frontend/nginx.conf` anpassen) |
 | `BASE_DIR`, `BINDS` | Bind-Mount für das Datenverzeichnis |
-| `REGISTRATION_ENABLED` | `false` schaltet die Registrierung neuer Benutzer ab |
 | `ACCENT_COLOR` | Akzentfarbe als `#rrggbb` (Standard `#65a30d`, Lime); alle Abstufungen werden daraus berechnet. Wird zur Laufzeit gelesen – Neustart reicht, kein Rebuild |
 | `COMPOSE_PROFILES`, `SQLITE_WEB_PORT` | `tools` startet zusätzlich sqlite-web (ohne Login, nur lokal binden) |
 

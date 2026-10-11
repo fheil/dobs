@@ -3,14 +3,14 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../db.js';
 import { authenticate, isCurrentUserAdmin } from '../auth-middleware.js';
+import { getSettings } from '../settings.js';
 
 const router = Router();
 const secret = process.env.JWT_SECRET || 'change-this-secret-in-production';
-const registrationEnabled = process.env.REGISTRATION_ENABLED !== 'false';
 const tokenFor = user => jwt.sign({ id: user.id, username: user.username }, secret, { expiresIn: '7d' });
 
 router.post('/register', (req, res) => {
-  if (!registrationEnabled) return res.status(403).json({ error: 'Registrierung ist derzeit deaktiviert.' });
+  if (!getSettings().registration_enabled) return res.status(403).json({ error: 'Registrierung ist derzeit deaktiviert.' });
   const { username, password } = req.body || {};
   if (typeof username !== 'string' || username.trim().length < 3 || typeof password !== 'string' || password.length < 8)
     return res.status(400).json({ error: 'Benutzername (mind. 3 Zeichen) und Passwort (mind. 8 Zeichen) erforderlich.' });
@@ -31,7 +31,7 @@ router.post('/login', (req, res) => {
 });
 
 router.get('/registration-status', (_req, res) => {
-  res.json({ enabled: registrationEnabled });
+  res.json({ enabled: getSettings().registration_enabled });
 });
 
 router.put('/password', authenticate, (req, res) => {

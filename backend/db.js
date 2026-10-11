@@ -62,7 +62,8 @@ CREATE TABLE IF NOT EXISTS app_settings (
   delete_done_allowed INTEGER NOT NULL DEFAULT 0,
   delete_reacted_allowed INTEGER NOT NULL DEFAULT 0,
   lock_reacted INTEGER NOT NULL DEFAULT 1,
-  admins_see_deleted INTEGER NOT NULL DEFAULT 1
+  admins_see_deleted INTEGER NOT NULL DEFAULT 1,
+  registration_enabled INTEGER NOT NULL DEFAULT 1
 );
 
 INSERT OR IGNORE INTO app_settings (id) VALUES (1);
@@ -96,6 +97,9 @@ if (!columns('users').includes('admin')) {
 }
 for (const col of ['report_start_day INTEGER NOT NULL DEFAULT 0', 'report_end_day INTEGER NOT NULL DEFAULT 6']) {
   if (!columns('users').includes(col.split(' ')[0])) db.exec(`ALTER TABLE users ADD COLUMN ${col}`);
+}
+if (!columns('app_settings').includes('registration_enabled')) {
+  db.exec('ALTER TABLE app_settings ADD COLUMN registration_enabled INTEGER NOT NULL DEFAULT 1');
 }
 // The report week used to be a global setting.
 db.exec('DROP TABLE IF EXISTS config');

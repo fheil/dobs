@@ -6,7 +6,8 @@ export const SETTING_KEYS = [
   'delete_done_allowed',     // ... auch erledigte
   'delete_reacted_allowed',  // ... auch mit Reaktionen anderer
   'lock_reacted',            // Reaktionen anderer sperren Titel/Inhalt/Datum (nur "Erledigt" bleibt)
-  'admins_see_deleted'       // Admins sehen gelöschte Einträge in Journal und Hindernisse
+  'admins_see_deleted',      // Admins sehen gelöschte Einträge in Journal, Report und Hindernisse
+  'registration_enabled'     // Neue Benutzer können sich selbst registrieren
 ];
 
 export function getSettings() {

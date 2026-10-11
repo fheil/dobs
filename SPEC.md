@@ -13,7 +13,8 @@ dabei aufgetreten sind. Mehrere Benutzer arbeiten in gemeinsamen Projekten.
 - Optionaler, eigener sqlite-web-Container nur für die dobs-Datenbank, nur
   lokal erreichbar.
 - Eigener Login mit Benutzername und Passwort, kein externer
-  Identity-Provider. Die Registrierung lässt sich abschalten.
+  Identity-Provider. Admins können die Registrierung in den Einstellungen
+  abschalten.
 
 ## Projekte und Rechte
 
@@ -120,7 +121,10 @@ Nur für Admins:
    gelöscht werden. Namen sind eindeutig (ohne Beachtung von Groß- und
    Kleinschreibung).
 5. **Admin-Rechte** erteilen und entziehen.
-6. **Löschen & Sperren** (gilt für alle Projekte):
+6. **Registrierung:** Schalter, ob sich neue Benutzer selbst registrieren
+   können (Standard an). Aus: Der Link „Registrieren“ auf der Login-Seite
+   verschwindet.
+7. **Löschen & Sperren** (gilt für alle Projekte):
    - *Einträge löschen erlaubt* (Hauptschalter, Standard an)
    - *Erledigte Einträge löschbar* (Standard aus: erst „Erledigt“
      herausnehmen)
