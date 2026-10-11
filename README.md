@@ -2,8 +2,8 @@
 
 diary for done tasks and log of obstacles
 
-Aufbau wie `paindiary`: Node/Express-Backend mit SQLite, React/Vite-Frontend
-hinter nginx, Deployment per Docker Compose hinter Traefik. Anforderungen
+Node/Express-Backend mit SQLite, React/Vite-Frontend hinter nginx,
+Deployment per Docker Compose hinter Traefik. Anforderungen
 siehe [SPEC.md](SPEC.md).
 
 ## Betrieb

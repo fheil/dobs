@@ -6,6 +6,7 @@ import entriesRoutes from './routes/entries.js';
 import projectsRoutes from './routes/projects.js';
 import adminRoutes from './routes/admin.js';
 import configRoutes from './routes/config.js';
+import iconsRoutes from './routes/icons.js';
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use('/api/entries', entriesRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/config', configRoutes);
+app.use('/api/icons', iconsRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err);

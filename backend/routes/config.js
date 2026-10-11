@@ -1,11 +1,9 @@
 import { Router } from 'express';
 import db from '../db.js';
 import { authenticate, requireAdmin } from '../auth-middleware.js';
+import { accentFromEnv as accentColor } from '../accent.js';
 
 const router = Router();
-
-const HEX_RE = /^#[0-9a-fA-F]{6}$/;
-const accentColor = HEX_RE.test(process.env.ACCENT_COLOR || '') ? process.env.ACCENT_COLOR : null;
 
 const readConfig = () => {
   const c = db.prepare('SELECT report_start_day, report_end_day FROM config WHERE id = 1').get();
