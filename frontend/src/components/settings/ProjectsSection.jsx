@@ -48,6 +48,9 @@ export default function ProjectsSection({ onProjectsChanged }) {
   };
 
   const addRow = () => {
+    // Reuse an empty unsaved line instead of piling up blank ones.
+    const blank = rows.find(r => !r.id && !r.name.trim());
+    if (blank) return inputs.current[blank.key]?.focus();
     const key = `new${++tempKey}`;
     setRows(list => [...list, { key, id: null, name: '', saved: '', entry_count: 0 }]);
     setFocusKey(key);
@@ -81,7 +84,12 @@ export default function ProjectsSection({ onProjectsChanged }) {
               value={row.name}
               onChange={e => update(row.key, { name: e.target.value })}
               onBlur={() => save(row)}
-              onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              onKeyDown={e => {
+                // Enter saves (via blur) and continues in a fresh line.
+                if (e.key !== 'Enter' || !row.name.trim()) return;
+                e.currentTarget.blur();
+                addRow();
+              }}
             />
             <button
               type="button"
