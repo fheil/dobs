@@ -13,7 +13,7 @@ export default function ReportTab({ project, user, onOpenDay, onError }) {
   const days = Array.from({ length: dayRange.end - dayRange.start + 1 }, (_, i) => addDays(weekStart, dayRange.start + i));
 
   useEffect(() => {
-    api('/config')
+    api('/auth/preferences')
       .then(c => setDayRange({ start: c.reportStartDay, end: c.reportEndDay }))
       .catch(e => onError(e.message));
   }, []);

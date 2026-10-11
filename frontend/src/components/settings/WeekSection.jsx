@@ -14,7 +14,7 @@ export default function WeekSection() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    api('/config')
+    api('/auth/preferences')
       .then(c => setRange({ start: c.reportStartDay, end: c.reportEndDay }))
       .catch(e => setError(e.message));
   }, []);
@@ -29,7 +29,7 @@ export default function WeekSection() {
     setError('');
     setMessage('');
     try {
-      const c = await api('/config', {
+      const c = await api('/auth/preferences', {
         method: 'PUT',
         body: JSON.stringify({ reportStartDay: range.start, reportEndDay: range.end })
       });
@@ -47,7 +47,7 @@ export default function WeekSection() {
   return (
     <>
       <h2>Report-Woche</h2>
-      <p className="muted">Welche Wochentage der Report anzeigt. Gilt für alle Benutzer.</p>
+      <p className="muted">Welche Wochentage dein Report anzeigt. Gilt nur für dich.</p>
 
       <form onSubmit={save} className="narrow">
         <div className="preset-row">

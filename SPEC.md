@@ -24,7 +24,7 @@ dabei aufgetreten sind. Mehrere Benutzer arbeiten in gemeinsamen Projekten.
 - Benutzer werden Projekten mit „Lesen“ oder „Lesen+Schreiben“ zugeordnet.
   Wer zugeordnet ist, sieht alle Einträge des Projekts (mit Autor). Ändern
   und löschen darf man nur eigene Einträge, und nur mit „Lesen+Schreiben“.
-- Admins verwalten Projekte, Zuordnungen, Admin-Rechte und die Report-Woche.
+- Admins verwalten Projekte, Zuordnungen und Admin-Rechte.
   Der erste registrierte Benutzer wird Admin; den eigenen Admin-Status kann
   man nicht ändern. Wer ein Projekt anlegt, wird ihm mit „Lesen+Schreiben“
   zugeordnet.
@@ -72,7 +72,8 @@ Journal, Report und Hindernisse:
 
 - Wochenansicht, mit vor/zurück-Buttons und „Heute“-Button.
 - Alle Einträge der gewählten Woche, nach Tag gruppiert.
-- Es werden nur die Wochentage aus der Einstellung „Report-Woche“ angezeigt.
+- Es werden nur die Wochentage aus der persönlichen Einstellung
+  „Report-Woche“ angezeigt.
 - Ein Klick auf einen Tag öffnet ihn im Journal.
 
 ## Tab 3 – Hindernisse
@@ -85,19 +86,22 @@ Journal, Report und Hindernisse:
 
 ## Tab 4 – Einstellungen
 
-Unterseiten, alle außer der ersten nur für Admins:
+Für alle Benutzer:
 
 1. **Passwort ändern.**
-2. **Projektzuordnung:** Benutzern Projekte mit „Lesen“ oder
+2. **Report-Woche:** Slider über Mo–So, welche Wochentage der eigene Report
+   anzeigt; Schnellwahl „Mo–Fr“ und „Mo–So“. Standard ist Mo–So. Gilt nur
+   für den jeweiligen Benutzer.
+
+Nur für Admins:
+
+3. **Projektzuordnung:** Benutzern Projekte mit „Lesen“ oder
    „Lesen+Schreiben“ zuordnen.
-3. **Projekte:** eine Eingabezeile pro Projektname, darunter `+` für weitere
+4. **Projekte:** eine Eingabezeile pro Projektname, darunter `+` für weitere
    Zeilen, je Zeile ein Mülleimer. Projekte mit Einträgen können nicht
    gelöscht werden. Namen sind eindeutig (ohne Beachtung von Groß- und
    Kleinschreibung).
-4. **Admin-Rechte** erteilen und entziehen.
-5. **Report-Woche:** Slider über Mo–So, welche Wochentage der Report
-   anzeigt; Schnellwahl „Mo–Fr“ und „Mo–So“. Standard ist Mo–So. Gilt für
-   alle Benutzer.
+5. **Admin-Rechte** erteilen und entziehen.
 
 ## Erscheinungsbild
 

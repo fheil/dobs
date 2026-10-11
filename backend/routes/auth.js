@@ -47,6 +47,26 @@ router.put('/password', authenticate, (req, res) => {
   res.json({ success: true });
 });
 
+// Personal settings of the current user.
+const readPreferences = userId => {
+  const u = db.prepare('SELECT report_start_day, report_end_day FROM users WHERE id = ?').get(userId);
+  return { reportStartDay: u.report_start_day, reportEndDay: u.report_end_day };
+};
+
+router.get('/preferences', authenticate, (req, res) => {
+  res.json(readPreferences(req.user.id));
+});
+
+router.put('/preferences', authenticate, (req, res) => {
+  const start = Number(req.body?.reportStartDay);
+  const end = Number(req.body?.reportEndDay);
+  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end > 6 || start > end) {
+    return res.status(400).json({ error: 'Ungültiger Wochentagsbereich.' });
+  }
+  db.prepare('UPDATE users SET report_start_day = ?, report_end_day = ? WHERE id = ?').run(start, end, req.user.id);
+  res.json(readPreferences(req.user.id));
+});
+
 router.get('/me', authenticate, (req, res) => {
   const user = db.prepare('SELECT id, username FROM users WHERE id = ?').get(req.user.id);
   if (!user) return res.status(401).json({ error: 'Benutzer existiert nicht mehr.' });

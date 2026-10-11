@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS users (
   username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   admin INTEGER NOT NULL DEFAULT 0,
+  -- Which weekdays the user's Report lists: 0 = Montag ... 6 = Sonntag.
+  report_start_day INTEGER NOT NULL DEFAULT 0,
+  report_end_day INTEGER NOT NULL DEFAULT 6,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -34,16 +37,6 @@ CREATE TABLE IF NOT EXISTS project_members (
   role TEXT NOT NULL CHECK (role IN ('read', 'write')),
   PRIMARY KEY (project_id, user_id)
 );
-
--- Global UI settings (single row). report_start_day/report_end_day:
--- 0 = Montag ... 6 = Sonntag, which weekdays the Report tab lists.
-CREATE TABLE IF NOT EXISTS config (
-  id INTEGER PRIMARY KEY CHECK (id = 1),
-  report_start_day INTEGER NOT NULL DEFAULT 0,
-  report_end_day INTEGER NOT NULL DEFAULT 6
-);
-
-INSERT OR IGNORE INTO config (id) VALUES (1);
 
 CREATE TABLE IF NOT EXISTS entries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -86,6 +79,11 @@ const columns = table => db.prepare(`PRAGMA table_info(${table})`).all().map(c =
 if (!columns('users').includes('admin')) {
   db.exec('ALTER TABLE users ADD COLUMN admin INTEGER NOT NULL DEFAULT 0');
 }
+for (const col of ['report_start_day INTEGER NOT NULL DEFAULT 0', 'report_end_day INTEGER NOT NULL DEFAULT 6']) {
+  if (!columns('users').includes(col.split(' ')[0])) db.exec(`ALTER TABLE users ADD COLUMN ${col}`);
+}
+// The report week used to be a global setting.
+db.exec('DROP TABLE IF EXISTS config');
 if (!columns('entries').includes('project_id')) {
   db.exec('ALTER TABLE entries ADD COLUMN project_id INTEGER REFERENCES projects(id) ON DELETE RESTRICT');
 }

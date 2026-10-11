@@ -8,11 +8,11 @@ import WeekSection from './settings/WeekSection';
 export default function SettingsTab({ user, onProjectsChanged }) {
   const sections = [
     { key: 'password', label: 'Passwort ändern' },
+    { key: 'week', label: 'Report-Woche' },
     ...(user.admin ? [
       { key: 'members', label: 'Projektzuordnung' },
       { key: 'projects', label: 'Projekte' },
-      { key: 'admins', label: 'Admin-Rechte' },
-      { key: 'week', label: 'Report-Woche' }
+      { key: 'admins', label: 'Admin-Rechte' }
     ] : [])
   ];
   const [active, setActive] = useState('password');
