@@ -28,6 +28,7 @@ services:
       # expects exactly that.
       - PORT=8050
       - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-}
       - ACCENT_COLOR=${ACCENT_COLOR}
     volumes:
       - ${BASE_DIR}/${BINDS}/data:/app/data

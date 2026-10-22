@@ -1,50 +1,80 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import db, { isUniqueViolation } from '../db.js';
-import { authenticate, isCurrentUserAdmin } from '../auth-middleware.js';
+import { authenticate, isCurrentUserAdmin, signToken } from '../auth-middleware.js';
 import { getSettings } from '../settings.js';
+import { isBlocked, recordFailure, recordSuccess, TOO_MANY } from '../rate-limit.js';
+import { LIMITS, hasControlChars } from '../limits.js';
+import { ADMIN_USERNAME } from '../admin-bootstrap.js';
 
 const router = Router();
-const secret = process.env.JWT_SECRET || 'change-this-secret-in-production';
-const tokenFor = user => jwt.sign({ id: user.id, username: user.username }, secret, { expiresIn: '7d' });
+
+// Compared against when the username doesn't exist, so a login takes the
+// same time either way (no username probing via response times).
+const DUMMY_HASH = bcrypt.hashSync('dummy-password-for-timing', 12);
+
+const passwordError = password => {
+  if (typeof password !== 'string' || password.length < 8) return 'Passwort muss mindestens 8 Zeichen haben.';
+  if (Buffer.byteLength(password) > LIMITS.passwordBytes) return `Passwort ist zu lang (höchstens ${LIMITS.passwordBytes} Zeichen, Umlaute zählen doppelt).`;
+  return null;
+};
 
 router.post('/register', (req, res) => {
   if (!getSettings().registration_enabled) return res.status(403).json({ error: 'Registrierung ist derzeit deaktiviert.' });
   const { username, password } = req.body || {};
-  if (typeof username !== 'string' || username.trim().length < 3 || typeof password !== 'string' || password.length < 8)
-    return res.status(400).json({ error: 'Benutzername (mind. 3 Zeichen) und Passwort (mind. 8 Zeichen) erforderlich.' });
+  const name = typeof username === 'string' ? username.trim() : '';
+  if (name.length < 3 || name.length > LIMITS.username || hasControlChars(name)) {
+    return res.status(400).json({ error: `Benutzername muss 3 bis ${LIMITS.username} Zeichen haben.` });
+  }
+  const pwError = passwordError(password);
+  if (pwError) return res.status(400).json({ error: pwError });
   try {
-    // The very first user becomes admin, so somebody can manage projects.
-    const admin = db.prepare('SELECT 1 FROM users LIMIT 1').get() ? 0 : 1;
-    const info = db.prepare('INSERT INTO users (username, password_hash, admin) VALUES (?, ?, ?)').run(username.trim(), bcrypt.hashSync(password, 12), admin);
-    const user = { id: Number(info.lastInsertRowid), username: username.trim(), admin: !!admin };
-    res.status(201).json({ token: tokenFor(user), user });
+    // Who becomes admin on sign-up: with ADMIN_USERNAME set only that name
+    // (and only while there is no admin yet), otherwise the very first user.
+    const noAdminYet = !db.prepare('SELECT 1 FROM users WHERE admin = 1').get();
+    const admin = ADMIN_USERNAME
+      ? (noAdminYet && name === ADMIN_USERNAME ? 1 : 0)
+      : (db.prepare('SELECT 1 FROM users LIMIT 1').get() ? 0 : 1);
+    const info = db.prepare('INSERT INTO users (username, password_hash, admin) VALUES (?, ?, ?)').run(name, bcrypt.hashSync(password, 12), admin);
+    const user = { id: Number(info.lastInsertRowid), username: name, token_version: 0 };
+    res.status(201).json({ token: signToken(user), user: { id: user.id, username: name, admin: !!admin } });
   } catch (e) { res.status(isUniqueViolation(e) ? 409 : 500).json({ error: isUniqueViolation(e) ? 'Benutzername bereits vergeben.' : 'Registrierung fehlgeschlagen.' }); }
 });
 
 router.post('/login', (req, res) => {
+  if (isBlocked(req.ip)) return res.status(429).json(TOO_MANY);
   const { username, password } = req.body || {};
-  const user = db.prepare('SELECT id, username, password_hash, admin FROM users WHERE username = ?').get(typeof username === 'string' ? username.trim() : '');
-  if (!user || !bcrypt.compareSync(password || '', user.password_hash)) return res.status(401).json({ error: 'Ungültige Zugangsdaten.' });
-  res.json({ token: tokenFor(user), user: { id: user.id, username: user.username, admin: !!user.admin } });
+  const user = db.prepare('SELECT id, username, password_hash, admin, token_version FROM users WHERE username = ?')
+    .get(typeof username === 'string' ? username.trim() : '');
+  const valid = bcrypt.compareSync(typeof password === 'string' ? password : '', user?.password_hash || DUMMY_HASH);
+  if (!user || !valid) {
+    recordFailure(req.ip);
+    return res.status(401).json({ error: 'Ungültige Zugangsdaten.' });
+  }
+  recordSuccess(req.ip);
+  res.json({ token: signToken(user), user: { id: user.id, username: user.username, admin: !!user.admin } });
 });
 
 router.get('/registration-status', (_req, res) => {
   res.json({ enabled: getSettings().registration_enabled });
 });
 
+// Changing the password logs out every other session: token_version goes up,
+// which invalidates all older tokens. This session gets a fresh token.
 router.put('/password', authenticate, (req, res) => {
+  if (isBlocked(req.ip)) return res.status(429).json(TOO_MANY);
   const { currentPassword, newPassword } = req.body || {};
-  if (typeof newPassword !== 'string' || newPassword.length < 8) {
-    return res.status(400).json({ error: 'Neues Passwort muss mindestens 8 Zeichen haben.' });
-  }
-  const user = db.prepare('SELECT password_hash FROM users WHERE id = ?').get(req.user.id);
-  if (!user || !bcrypt.compareSync(currentPassword || '', user.password_hash)) {
+  const pwError = passwordError(newPassword);
+  if (pwError) return res.status(400).json({ error: pwError });
+  const user = db.prepare('SELECT id, username, password_hash, token_version FROM users WHERE id = ?').get(req.user.id);
+  if (!user || !bcrypt.compareSync(typeof currentPassword === 'string' ? currentPassword : '', user.password_hash)) {
+    recordFailure(req.ip);
     return res.status(401).json({ error: 'Aktuelles Passwort ist falsch.' });
   }
-  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(bcrypt.hashSync(newPassword, 12), req.user.id);
-  res.json({ success: true });
+  recordSuccess(req.ip);
+  db.prepare('UPDATE users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?')
+    .run(bcrypt.hashSync(newPassword, 12), user.id);
+  res.json({ success: true, token: signToken({ ...user, token_version: user.token_version + 1 }) });
 });
 
 // Personal settings of the current user.

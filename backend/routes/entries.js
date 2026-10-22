@@ -3,6 +3,7 @@ import db, { roleFor } from '../db.js';
 import { authenticate, isCurrentUserAdmin } from '../auth-middleware.js';
 import { REACTION_KINDS, othersReactionCounts, reactionsFor, withReactions } from '../reactions.js';
 import { getSettings } from '../settings.js';
+import { LIMITS } from '../limits.js';
 
 const router = Router();
 router.use(authenticate);
@@ -25,7 +26,9 @@ function parseFields(b) {
     values.entry_time = t;
   }
   for (const f of TEXT_FIELDS) {
-    if (f in b) values[f] = typeof b[f] === 'string' ? b[f] : '';
+    if (!(f in b)) continue;
+    values[f] = typeof b[f] === 'string' ? b[f] : '';
+    if (values[f].length > LIMITS[f]) return { error: `Text zu lang (höchstens ${LIMITS[f]} Zeichen).` };
   }
   if ('done' in b) values.done = b.done ? 1 : 0;
   return { values };

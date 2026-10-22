@@ -17,6 +17,22 @@ dabei aufgetreten sind. Mehrere Benutzer arbeiten in gemeinsamen Projekten.
   Identity-Provider. Admins können die Registrierung in den Einstellungen
   abschalten.
 
+## Sicherheit
+
+- Das Backend startet nur mit einem sicheren `JWT_SECRET` (mind. 32
+  Zeichen, kein bekannter Platzhalter).
+- Erster Admin: mit `ADMIN_USERNAME` nur dieser Benutzername, sonst der
+  erste registrierte Benutzer.
+- Login und Passwortänderung: nach 10 Fehlversuchen pro IP 15 Minuten
+  Sperre.
+- Eine Passwortänderung meldet alle anderen Sitzungen ab (Token-Version).
+- Längengrenzen: Benutzername 3–50, Passwort 8–72 Byte, Projektname 100,
+  Titel 200, Inhalt 20 000, Hindernisse 10 000 Zeichen; Anfragen max. 100 KB.
+- Sicherheits-Header (CSP, X-Frame-Options, nosniff, Referrer-Policy); nginx
+  verrät seine Version nicht.
+- Normale Benutzer erfahren nichts über Admin-Funktionen; Admin-Aufrufe
+  durch Nicht-Admins liefern 404.
+
 ## Projekte und Rechte
 
 - Jeder Eintrag gehört zu genau einem Projekt.

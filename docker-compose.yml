@@ -23,6 +23,7 @@ services:
       # and does NOT read this variable. If you change PORT, update nginx.conf too.
       - PORT=${PORT}
       - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-}
       - FRONTEND_URL=https://${DOMAIN}
       - ACCENT_COLOR=${ACCENT_COLOR}
     volumes:

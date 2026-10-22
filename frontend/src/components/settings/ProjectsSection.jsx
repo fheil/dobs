@@ -81,6 +81,7 @@ export default function ProjectsSection({ onProjectsChanged }) {
             <input
               ref={el => { inputs.current[row.key] = el; }}
               placeholder="Projektname"
+              maxLength={100}
               value={row.name}
               onChange={e => update(row.key, { name: e.target.value })}
               onBlur={() => save(row)}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { api } from '../../api';
+import { api, setSession } from '../../api';
 
 const EMPTY = { currentPassword: '', newPassword: '', repeat: '' };
 
@@ -16,12 +16,14 @@ export default function PasswordSection() {
     setSuccess('');
     if (form.newPassword !== form.repeat) return setError('Die neuen Passwörter stimmen nicht überein.');
     try {
-      await api('/auth/password', {
+      const { token } = await api('/auth/password', {
         method: 'PUT',
         body: JSON.stringify({ currentPassword: form.currentPassword, newPassword: form.newPassword })
       });
+      // Older tokens are now invalid; keep this session with the new one.
+      setSession(token);
       setForm(EMPTY);
-      setSuccess('Passwort wurde geändert.');
+      setSuccess('Passwort wurde geändert. Andere angemeldete Geräte wurden abgemeldet.');
     } catch (x) {
       setError(x.message);
     }
@@ -37,11 +39,11 @@ export default function PasswordSection() {
         </label>
         <label>
           Neues Passwort (mind. 8 Zeichen)
-          <input type="password" autoComplete="new-password" minLength={8} value={form.newPassword} onChange={set('newPassword')} required />
+          <input type="password" autoComplete="new-password" minLength={8} maxLength={72} value={form.newPassword} onChange={set('newPassword')} required />
         </label>
         <label>
           Neues Passwort wiederholen
-          <input type="password" autoComplete="new-password" minLength={8} value={form.repeat} onChange={set('repeat')} required />
+          <input type="password" autoComplete="new-password" minLength={8} maxLength={72} value={form.repeat} onChange={set('repeat')} required />
         </label>
         {error && <p className="error">{error}</p>}
         {success && <p className="success">{success}</p>}

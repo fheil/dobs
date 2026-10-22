@@ -46,6 +46,7 @@ export default function Auth({ onLogin, error: externalError }) {
             <input
               type="text"
               autoComplete="username"
+              maxLength={50}
               value={form.username}
               onChange={e => setForm({ ...form, username: e.target.value })}
               required

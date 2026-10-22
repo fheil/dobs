@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS users (
   username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   admin INTEGER NOT NULL DEFAULT 0,
+  -- Raised on password change; tokens carry it and go stale when it differs.
+  token_version INTEGER NOT NULL DEFAULT 0,
   -- Which weekdays the user's Report lists: 0 = Montag ... 6 = Sonntag.
   report_start_day INTEGER NOT NULL DEFAULT 0,
   report_end_day INTEGER NOT NULL DEFAULT 6,
@@ -110,12 +112,6 @@ CREATE TABLE IF NOT EXISTS entry_reactions (
   PRIMARY KEY (entry_id, user_id, kind)
 );
 `);
-
-// Self-healing: without any admin (e.g. after editing users in sqlite-web)
-// nobody could manage projects - promote the oldest user.
-if (!db.prepare('SELECT 1 FROM users WHERE admin = 1').get()) {
-  db.prepare('UPDATE users SET admin = 1 WHERE id = (SELECT min(id) FROM users)').run();
-}
 
 export function roleFor(userId, projectId) {
   return db.prepare('SELECT role FROM project_members WHERE user_id = ? AND project_id = ?').get(userId, projectId)?.role || null;

@@ -47,6 +47,7 @@ export default function EntryTile({ entry, showAuthor, showDelete, autoFocus, on
           ref={titleRef}
           className="tile-title"
           placeholder="Titel"
+          maxLength={200}
           value={draft.title}
           onChange={e => set('title', e.target.value)}
           onBlur={commitField('title')}
@@ -95,6 +96,7 @@ export default function EntryTile({ entry, showAuthor, showDelete, autoFocus, on
         <textarea
           rows={3}
           placeholder="Was wurde erledigt?"
+          maxLength={20000}
           readOnly={fieldsLocked}
           value={draft.content}
           onChange={e => set('content', e.target.value)}
@@ -107,6 +109,7 @@ export default function EntryTile({ entry, showAuthor, showDelete, autoFocus, on
         <textarea
           rows={2}
           placeholder="Was stand im Weg?"
+          maxLength={10000}
           readOnly={fieldsLocked}
           value={draft.obstacles}
           onChange={e => set('obstacles', e.target.value)}

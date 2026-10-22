@@ -2,6 +2,7 @@ import { Router } from 'express';
 import db, { isUniqueViolation, transaction } from '../db.js';
 import { authenticate, requireAdmin } from '../auth-middleware.js';
 import { getSettings, updateSettings } from '../settings.js';
+import { LIMITS, hasControlChars } from '../limits.js';
 
 const router = Router();
 router.use(authenticate, requireAdmin);
@@ -42,6 +43,11 @@ const projectRow = id => db.prepare(`
 `).get(id);
 
 const cleanName = name => (typeof name === 'string' ? name.trim() : '');
+const projectNameError = name => {
+  if (!name) return 'Projektname erforderlich.';
+  if (name.length > LIMITS.projectName || hasControlChars(name)) return `Projektname darf höchstens ${LIMITS.projectName} Zeichen haben.`;
+  return null;
+};
 
 const uniqueError = (e, res) => {
   if (isUniqueViolation(e)) return res.status(409).json({ error: 'Ein Projekt mit diesem Namen gibt es schon.' });
@@ -58,7 +64,8 @@ router.get('/projects', (_req, res) => {
 
 router.post('/projects', (req, res) => {
   const name = cleanName(req.body?.name);
-  if (!name) return res.status(400).json({ error: 'Projektname erforderlich.' });
+  const nameError = projectNameError(name);
+  if (nameError) return res.status(400).json({ error: nameError });
   try {
     const id = transaction(() => {
       const info = db.prepare('INSERT INTO projects (name) VALUES (?)').run(name);
@@ -72,7 +79,8 @@ router.post('/projects', (req, res) => {
 
 router.put('/projects/:id', (req, res) => {
   const name = cleanName(req.body?.name);
-  if (!name) return res.status(400).json({ error: 'Projektname erforderlich.' });
+  const nameError = projectNameError(name);
+  if (nameError) return res.status(400).json({ error: nameError });
   try {
     const r = db.prepare('UPDATE projects SET name = ? WHERE id = ?').run(name, req.params.id);
     if (!r.changes) return res.status(404).json({ error: 'Projekt nicht gefunden.' });

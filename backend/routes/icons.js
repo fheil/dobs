@@ -66,7 +66,7 @@ const icons = {
 };
 
 router.get('/:name', (req, res) => {
-  const icon = icons[req.params.name];
+  const icon = Object.hasOwn(icons, req.params.name) ? icons[req.params.name] : null;
   if (!icon) return res.status(404).end();
   // no-cache + ETag: browsers revalidate cheaply and pick up a new color.
   res.set('Cache-Control', 'no-cache').type(icon.type).send(icon.body);
