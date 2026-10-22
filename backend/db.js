@@ -1,14 +1,33 @@
-import Database from 'better-sqlite3';
+// Node's built-in SQLite: no native npm module, so the image build needs no
+// binary download or compiler (works behind restrictive proxies).
+import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const dataDir = process.env.DATA_DIR || '/app/data';
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-const db = new Database(path.join(dataDir, 'dobs.db'));
+const db = new DatabaseSync(path.join(dataDir, 'dobs.db'));
 
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+// busy_timeout: wait up to 5 s for a lock (e.g. held by sqlite-web) instead
+// of failing right away.
+db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
+
+// Runs fn inside a transaction; rolls back if it throws.
+export function transaction(fn) {
+  db.exec('BEGIN');
+  try {
+    const result = fn();
+    db.exec('COMMIT');
+    return result;
+  } catch (e) {
+    db.exec('ROLLBACK');
+    throw e;
+  }
+}
+
+// SQLITE_CONSTRAINT_UNIQUE (extended result code 2067).
+export const isUniqueViolation = e => e?.errcode === 2067;
 
 // entry_date: "YYYY-MM-DD" (Pflicht), entry_time: "HH:MM" oder '' (optional).
 // Ein Hindernis gilt als gelöst, sobald done = 1 ist.
@@ -41,7 +60,7 @@ CREATE TABLE IF NOT EXISTS project_members (
 CREATE TABLE IF NOT EXISTS entries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  project_id INTEGER REFERENCES projects(id) ON DELETE RESTRICT,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE RESTRICT,
   entry_date TEXT NOT NULL,
   entry_time TEXT NOT NULL DEFAULT '',
   title TEXT NOT NULL DEFAULT '',
@@ -54,6 +73,8 @@ CREATE TABLE IF NOT EXISTS entries (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE INDEX IF NOT EXISTS idx_entries_project_date ON entries(project_id, entry_date);
 
 -- App-wide rules for deleting/locking entries (single row, set by admins).
 CREATE TABLE IF NOT EXISTS app_settings (
@@ -90,32 +111,8 @@ CREATE TABLE IF NOT EXISTS entry_reactions (
 );
 `);
 
-// Migration for databases created before projects/admin existed.
-const columns = table => db.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
-if (!columns('users').includes('admin')) {
-  db.exec('ALTER TABLE users ADD COLUMN admin INTEGER NOT NULL DEFAULT 0');
-}
-for (const col of ['report_start_day INTEGER NOT NULL DEFAULT 0', 'report_end_day INTEGER NOT NULL DEFAULT 6']) {
-  if (!columns('users').includes(col.split(' ')[0])) db.exec(`ALTER TABLE users ADD COLUMN ${col}`);
-}
-if (!columns('app_settings').includes('registration_enabled')) {
-  db.exec('ALTER TABLE app_settings ADD COLUMN registration_enabled INTEGER NOT NULL DEFAULT 1');
-}
-// The report week used to be a global setting.
-db.exec('DROP TABLE IF EXISTS config');
-for (const col of ['deleted_at TEXT', 'deleted_by INTEGER REFERENCES users(id) ON DELETE SET NULL']) {
-  if (!columns('entries').includes(col.split(' ')[0])) db.exec(`ALTER TABLE entries ADD COLUMN ${col}`);
-}
-if (!columns('entries').includes('project_id')) {
-  db.exec('ALTER TABLE entries ADD COLUMN project_id INTEGER REFERENCES projects(id) ON DELETE RESTRICT');
-}
-
-db.exec(`
-DROP INDEX IF EXISTS idx_entries_user_date;
-CREATE INDEX IF NOT EXISTS idx_entries_project_date ON entries(project_id, entry_date);
-`);
-
-// Without any admin nobody could manage projects - promote the oldest user.
+// Self-healing: without any admin (e.g. after editing users in sqlite-web)
+// nobody could manage projects - promote the oldest user.
 if (!db.prepare('SELECT 1 FROM users WHERE admin = 1').get()) {
   db.prepare('UPDATE users SET admin = 1 WHERE id = (SELECT min(id) FROM users)').run();
 }

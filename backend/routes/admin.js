@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import db from '../db.js';
+import db, { isUniqueViolation, transaction } from '../db.js';
 import { authenticate, requireAdmin } from '../auth-middleware.js';
 import { getSettings, updateSettings } from '../settings.js';
 
@@ -44,7 +44,7 @@ const projectRow = id => db.prepare(`
 const cleanName = name => (typeof name === 'string' ? name.trim() : '');
 
 const uniqueError = (e, res) => {
-  if (e.code === 'SQLITE_CONSTRAINT_UNIQUE') return res.status(409).json({ error: 'Ein Projekt mit diesem Namen gibt es schon.' });
+  if (isUniqueViolation(e)) return res.status(409).json({ error: 'Ein Projekt mit diesem Namen gibt es schon.' });
   throw e;
 };
 
@@ -60,12 +60,12 @@ router.post('/projects', (req, res) => {
   const name = cleanName(req.body?.name);
   if (!name) return res.status(400).json({ error: 'Projektname erforderlich.' });
   try {
-    const id = db.transaction(() => {
+    const id = transaction(() => {
       const info = db.prepare('INSERT INTO projects (name) VALUES (?)').run(name);
       // The creating admin gets access right away.
       db.prepare("INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'write')").run(info.lastInsertRowid, req.user.id);
       return info.lastInsertRowid;
-    })();
+    });
     res.status(201).json(projectRow(id));
   } catch (e) { uniqueError(e, res); }
 });
@@ -98,7 +98,9 @@ router.get('/members', (_req, res) => {
 
 // Body: { project_id, user_id, role: 'read' | 'write' | null } - null removes access.
 router.put('/members', (req, res) => {
-  const { project_id, user_id, role } = req.body || {};
+  const project_id = Number(req.body?.project_id);
+  const user_id = Number(req.body?.user_id);
+  const role = req.body?.role ?? null;
   if (role !== null && role !== 'read' && role !== 'write') {
     return res.status(400).json({ error: 'Ungültige Rolle.' });
   }

@@ -1,7 +1,7 @@
-# No apt-get: better-sqlite3 and resvg ship prebuilt binaries for
-# linux-x64/Node 22, and the healthcheck uses node instead of curl. So the
-# build only needs Docker Hub and the npm registry (works behind firewalls
-# that block the Debian package mirrors).
+# No apt-get and no native module downloads: SQLite is Node's built-in
+# node:sqlite, resvg ships its binary inside an npm package, and the
+# healthcheck uses node instead of curl. So the build only needs Docker Hub
+# and the npm registry (works behind restrictive firewalls/proxies).
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json ./
@@ -17,4 +17,5 @@ COPY . .
 USER app
 EXPOSE 8050
 VOLUME ["/app/data"]
-CMD ["node", "server.js"]
+# node:sqlite is still flagged experimental in Node 22 - silence the notice.
+CMD ["node", "--disable-warning=ExperimentalWarning", "server.js"]

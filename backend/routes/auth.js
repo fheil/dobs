@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import db from '../db.js';
+import db, { isUniqueViolation } from '../db.js';
 import { authenticate, isCurrentUserAdmin } from '../auth-middleware.js';
 import { getSettings } from '../settings.js';
 
@@ -20,7 +20,7 @@ router.post('/register', (req, res) => {
     const info = db.prepare('INSERT INTO users (username, password_hash, admin) VALUES (?, ?, ?)').run(username.trim(), bcrypt.hashSync(password, 12), admin);
     const user = { id: Number(info.lastInsertRowid), username: username.trim(), admin: !!admin };
     res.status(201).json({ token: tokenFor(user), user });
-  } catch (e) { res.status(e.code === 'SQLITE_CONSTRAINT_UNIQUE' ? 409 : 500).json({ error: e.code === 'SQLITE_CONSTRAINT_UNIQUE' ? 'Benutzername bereits vergeben.' : 'Registrierung fehlgeschlagen.' }); }
+  } catch (e) { res.status(isUniqueViolation(e) ? 409 : 500).json({ error: isUniqueViolation(e) ? 'Benutzername bereits vergeben.' : 'Registrierung fehlgeschlagen.' }); }
 });
 
 router.post('/login', (req, res) => {
