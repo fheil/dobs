@@ -1,6 +1,7 @@
 // Input size limits (the frontend sets matching maxLength attributes).
 export const LIMITS = {
   username: 50,
+  displayName: 50,
   passwordBytes: 72,   // bcrypt only uses the first 72 bytes
   projectName: 100,
   title: 200,

@@ -57,7 +57,10 @@ export default function MembersSection({ user, onProjectsChanged }) {
             <tbody>
               {users.map(u => (
                 <tr key={u.id}>
-                  <td className="matrix-user">{u.username}</td>
+                  <td className="matrix-user">
+                    {u.display_name || u.username}
+                    {u.display_name && <span className="muted"> ({u.username})</span>}
+                  </td>
                   {projects.map(p => {
                     const value = roles[memberKey(p.id, u.id)] || '';
                     return (

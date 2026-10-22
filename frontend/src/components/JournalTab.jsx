@@ -120,7 +120,7 @@ export default function JournalTab({ project, user, date, onDateChange, onError 
             ? `Eintrag „${toDelete.title || 'ohne Titel'}“ löschen?`
             : toDelete.user_id === user.id
               ? `Eintrag „${toDelete.title || 'ohne Titel'}“ löschen? Er lässt sich wiederherstellen.`
-              : `Eintrag „${toDelete.title || 'ohne Titel'}“ von ${toDelete.username} als Admin löschen? Er lässt sich wiederherstellen.`}
+              : `Eintrag „${toDelete.title || 'ohne Titel'}“ von ${toDelete.author_name} als Admin löschen? Er lässt sich wiederherstellen.`}
           onConfirm={remove}
           onCancel={() => setToDelete(null)}
         />

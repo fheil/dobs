@@ -4,6 +4,7 @@ import { authenticate, isCurrentUserAdmin } from '../auth-middleware.js';
 import { REACTION_KINDS, othersReactionCounts, reactionsFor, withReactions } from '../reactions.js';
 import { getSettings } from '../settings.js';
 import { LIMITS } from '../limits.js';
+import { DISPLAY } from '../users.js';
 
 const router = Router();
 router.use(authenticate);
@@ -34,7 +35,7 @@ function parseFields(b) {
   return { values };
 }
 
-const SELECT = `SELECT e.*, u.username, d.username AS deleted_by_name
+const SELECT = `SELECT e.*, ${DISPLAY('u')} AS author_name, ${DISPLAY('d')} AS deleted_by_name
   FROM entries e JOIN users u ON u.id = e.user_id LEFT JOIN users d ON d.id = e.deleted_by`;
 const toJson = row => row && { ...row, done: !!row.done };
 

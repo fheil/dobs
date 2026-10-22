@@ -86,7 +86,7 @@ export default function ReportTab({ project, user, onOpenDay, onError }) {
                     {e.done ? <CheckCircle2 size={18} className="ok" /> : <Circle size={18} className="muted" />}
                     {e.entry_time && <span className="time">{e.entry_time}</span>}
                     <strong>{e.title || 'Ohne Titel'}</strong>
-                    {e.user_id !== user.id && <span className="author">{e.username}</span>}
+                    {e.user_id !== user.id && <span className="author">{e.author_name}</span>}
                   </div>
                   {e.content && <p className="pre">{e.content}</p>}
                   {e.obstacles && (

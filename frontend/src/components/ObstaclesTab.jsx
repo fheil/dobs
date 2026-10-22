@@ -68,7 +68,7 @@ export default function ObstaclesTab({ project, user, onOpenDay, onError }) {
                     {fmtDate(e.entry_date)}{e.entry_time && `, ${e.entry_time}`}
                   </button>
                   <span className="age">{openSince(e.entry_date)}</span>
-                  {e.user_id !== user.id && <span className="author">{e.username}</span>}
+                  {e.user_id !== user.id && <span className="author">{e.author_name}</span>}
                 </div>
                 <strong>{e.title || 'Ohne Titel'}</strong>
                 <p className="pre">{e.obstacles}</p>

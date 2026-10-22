@@ -1,13 +1,14 @@
 import db from './db.js';
+import { DISPLAY } from './users.js';
 
 export const REACTION_KINDS = ['shocked', 'support'];
 
 const empty = () => ({
   ratingCounts: [0, 0, 0, 0, 0], // index 0 = 1 Stern ... index 4 = 5 Sterne
   myRating: null,
-  shocked: [],                   // usernames
+  shocked: [],                   // display names
   myShocked: false,
-  support: [],                   // usernames
+  support: [],                   // display names
   mySupport: false
 });
 
@@ -33,11 +34,11 @@ export function reactionsFor(entryIds, userId) {
   }
 
   for (const r of db.prepare(`
-    SELECT x.entry_id, x.kind, x.user_id, u.username FROM entry_reactions x JOIN users u ON u.id = x.user_id
-    WHERE x.entry_id IN (SELECT value FROM json_each(?)) ORDER BY u.username COLLATE NOCASE
+    SELECT x.entry_id, x.kind, x.user_id, ${DISPLAY('u')} AS name FROM entry_reactions x JOIN users u ON u.id = x.user_id
+    WHERE x.entry_id IN (SELECT value FROM json_each(?)) ORDER BY name COLLATE NOCASE
   `).all(ids)) {
     const entry = result.get(r.entry_id);
-    entry[r.kind].push(r.username);
+    entry[r.kind].push(r.name);
     if (r.user_id === userId) entry[r.kind === 'shocked' ? 'myShocked' : 'mySupport'] = true;
   }
 

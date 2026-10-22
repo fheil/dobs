@@ -62,6 +62,8 @@ db.exec(`
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT NOT NULL UNIQUE,
+  -- What others see; NULL = show the login name. Unique (index below).
+  display_name TEXT,
   password_hash TEXT NOT NULL,
   admin INTEGER NOT NULL DEFAULT 0,
   -- Raised on password change; tokens carry it and go stale when it differs.
@@ -71,6 +73,8 @@ CREATE TABLE IF NOT EXISTS users (
   report_end_day INTEGER NOT NULL DEFAULT 6,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_display_name ON users(display_name COLLATE NOCASE);
 
 CREATE TABLE IF NOT EXISTS projects (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

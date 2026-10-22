@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import db, { isUniqueViolation } from '../db.js';
-import { authenticate, isCurrentUserAdmin, signToken } from '../auth-middleware.js';
+import { authenticate, signToken } from '../auth-middleware.js';
 import { getSettings } from '../settings.js';
 import { isBlocked, recordFailure, recordSuccess, TOO_MANY } from '../rate-limit.js';
 import { LIMITS, hasControlChars } from '../limits.js';
 import { ADMIN_USERNAME } from '../admin-bootstrap.js';
+import { publicUser, setDisplayName, usernameClashesWithDisplayName } from '../users.js';
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.post('/register', (req, res) => {
   }
   const pwError = passwordError(password);
   if (pwError) return res.status(400).json({ error: pwError });
+  if (usernameClashesWithDisplayName(name)) return res.status(409).json({ error: 'Benutzername bereits vergeben.' });
   try {
     // Who becomes admin on sign-up: with ADMIN_USERNAME set only that name
     // (and only while there is no admin yet), otherwise the very first user.
@@ -37,7 +39,7 @@ router.post('/register', (req, res) => {
       : (db.prepare('SELECT 1 FROM users LIMIT 1').get() ? 0 : 1);
     const info = db.prepare('INSERT INTO users (username, password_hash, admin) VALUES (?, ?, ?)').run(name, bcrypt.hashSync(password, 12), admin);
     const user = { id: Number(info.lastInsertRowid), username: name, token_version: 0 };
-    res.status(201).json({ token: signToken(user), user: { id: user.id, username: name, admin: !!admin } });
+    res.status(201).json({ token: signToken(user), user: publicUser(user.id) });
   } catch (e) { res.status(isUniqueViolation(e) ? 409 : 500).json({ error: isUniqueViolation(e) ? 'Benutzername bereits vergeben.' : 'Registrierung fehlgeschlagen.' }); }
 });
 
@@ -52,7 +54,7 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ error: 'Ungültige Zugangsdaten.' });
   }
   recordSuccess(req.ip);
-  res.json({ token: signToken(user), user: { id: user.id, username: user.username, admin: !!user.admin } });
+  res.json({ token: signToken(user), user: publicUser(user.id) });
 });
 
 router.get('/registration-status', (_req, res) => {
@@ -98,9 +100,16 @@ router.put('/preferences', authenticate, (req, res) => {
 });
 
 router.get('/me', authenticate, (req, res) => {
-  const user = db.prepare('SELECT id, username FROM users WHERE id = ?').get(req.user.id);
+  const user = publicUser(req.user.id);
   if (!user) return res.status(401).json({ error: 'Benutzer existiert nicht mehr.' });
-  res.json({ user: { ...user, admin: isCurrentUserAdmin(req) } });
+  res.json({ user });
+});
+
+// Own display name ('' clears it).
+router.put('/profile', authenticate, (req, res) => {
+  const { user, error, status } = setDisplayName(req.user.id, req.body?.displayName);
+  if (error) return res.status(status).json({ error });
+  res.json({ user });
 });
 
 export default router;

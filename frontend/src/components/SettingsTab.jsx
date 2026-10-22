@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
-import PasswordSection from './settings/PasswordSection';
+import ProfileSection from './settings/ProfileSection';
 import MembersSection from './settings/MembersSection';
-import AdminsSection from './settings/AdminsSection';
+import UsersSection from './settings/UsersSection';
 import ProjectsSection from './settings/ProjectsSection';
 import WeekSection from './settings/WeekSection';
 import DeleteSection from './settings/DeleteSection';
 import RegistrationSection from './settings/RegistrationSection';
 
-export default function SettingsTab({ user, onProjectsChanged }) {
+export default function SettingsTab({ user, onUserChange, onProjectsChanged }) {
   const sections = [
-    { key: 'password', label: 'Passwort ändern' },
+    { key: 'profile', label: 'Profil' },
     { key: 'week', label: 'Report-Woche' },
     ...(user.admin ? [
       { key: 'members', label: 'Projektzuordnung' },
       { key: 'projects', label: 'Projekte' },
-      { key: 'admins', label: 'Admin-Rechte' },
+      { key: 'users', label: 'Benutzer' },
       { key: 'registration', label: 'Registrierung' },
       { key: 'delete', label: 'Löschen & Sperren' }
     ] : [])
   ];
-  const [active, setActive] = useState('password');
+  const [active, setActive] = useState('profile');
 
   return (
     <div className="settings-layout">
@@ -37,10 +37,10 @@ export default function SettingsTab({ user, onProjectsChanged }) {
       </div>
 
       <div className="settings-panel">
-        {active === 'password' && <PasswordSection />}
+        {active === 'profile' && <ProfileSection user={user} onUserChange={onUserChange} />}
         {active === 'members' && <MembersSection user={user} onProjectsChanged={onProjectsChanged} />}
         {active === 'projects' && <ProjectsSection onProjectsChanged={onProjectsChanged} />}
-        {active === 'admins' && <AdminsSection user={user} />}
+        {active === 'users' && <UsersSection user={user} onUserChange={onUserChange} />}
         {active === 'week' && <WeekSection />}
         {active === 'registration' && <RegistrationSection />}
         {active === 'delete' && <DeleteSection />}

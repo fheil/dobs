@@ -3,6 +3,7 @@ import db, { isUniqueViolation, transaction } from '../db.js';
 import { authenticate, requireAdmin } from '../auth-middleware.js';
 import { getSettings, updateSettings } from '../settings.js';
 import { LIMITS, hasControlChars } from '../limits.js';
+import { setDisplayName } from '../users.js';
 
 const router = Router();
 router.use(authenticate, requireAdmin);
@@ -10,7 +11,10 @@ router.use(authenticate, requireAdmin);
 // ----- Benutzer / Admin-Rechte -----
 
 router.get('/users', (_req, res) => {
-  const users = db.prepare('SELECT id, username, admin FROM users ORDER BY username COLLATE NOCASE').all();
+  const users = db.prepare(`
+    SELECT id, username, display_name, admin FROM users
+    ORDER BY COALESCE(display_name, username) COLLATE NOCASE
+  `).all();
   res.json(users.map(u => ({ ...u, admin: !!u.admin })));
 });
 
@@ -22,6 +26,12 @@ router.put('/users/:id/admin', (req, res) => {
   const r = db.prepare('UPDATE users SET admin = ? WHERE id = ?').run(req.body?.admin ? 1 : 0, targetId);
   if (!r.changes) return res.status(404).json({ error: 'Benutzer nicht gefunden.' });
   res.json({ id: targetId, admin: !!req.body?.admin });
+});
+
+router.put('/users/:id/display-name', (req, res) => {
+  const { user, error, status } = setDisplayName(Number(req.params.id), req.body?.displayName);
+  if (error) return res.status(status).json({ error });
+  res.json({ id: user.id, display_name: user.displayName });
 });
 
 // ----- Löschen & Sperren -----

@@ -21,7 +21,7 @@ function readStoredProject(user) {
   try { return Number(localStorage.getItem(projectKey(user))) || null; } catch { return null; }
 }
 
-function MainApp({ user, logout }) {
+function MainApp({ user, logout, onUserChange }) {
   const [tab, setTab] = useState('journal');
   const [journalDate, setJournalDate] = useState(today());
   const [error, setError] = useState('');
@@ -87,7 +87,7 @@ function MainApp({ user, logout }) {
                 ))}
               </select>
             )}
-            <span>{user.username}</span>
+            <span>{user.displayName || user.username}</span>
             <button className="icon" title="Abmelden" onClick={logout}>
               <LogOut size={18} />
             </button>
@@ -119,7 +119,7 @@ function MainApp({ user, logout }) {
         {project && tab === 'journal' && <JournalTab {...tabProps} date={journalDate} onDateChange={setJournalDate} />}
         {project && tab === 'report' && <ReportTab {...tabProps} onOpenDay={openDay} />}
         {project && tab === 'obstacles' && <ObstaclesTab {...tabProps} onOpenDay={openDay} />}
-        {tab === 'settings' && <SettingsTab user={user} onProjectsChanged={loadProjects} />}
+        {tab === 'settings' && <SettingsTab user={user} onUserChange={onUserChange} onProjectsChanged={loadProjects} />}
       </main>
     </div>
   );
@@ -151,6 +151,7 @@ export default function App() {
     <MainApp
       key={user.id}
       user={user}
+      onUserChange={setUser}
       logout={() => {
         setSession(null);
         setUser(null);

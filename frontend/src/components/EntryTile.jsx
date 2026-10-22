@@ -53,7 +53,7 @@ export default function EntryTile({ entry, showAuthor, showDelete, autoFocus, on
           onBlur={commitField('title')}
           readOnly={fieldsLocked}
         />
-        {showAuthor && <span className="author">{entry.username}</span>}
+        {showAuthor && <span className="author">{entry.author_name}</span>}
         <label className="check">
           <input
             type="checkbox"

@@ -33,6 +33,19 @@ dabei aufgetreten sind. Mehrere Benutzer arbeiten in gemeinsamen Projekten.
 - Normale Benutzer erfahren nichts über Admin-Funktionen; Admin-Aufrufe
   durch Nicht-Admins liefern 404.
 
+## Benutzer und Anzeigenamen
+
+- Der Anmeldename dient nur zum Einloggen und ist unveränderlich.
+- Zusätzlich gibt es einen optionalen Anzeigenamen (2–50 Zeichen). Andere
+  Benutzer sehen überall nur diesen (Header, Autor, Reaktionen, „Gelöscht
+  von …“); ohne Anzeigenamen wird der Anmeldename angezeigt.
+- Sichtbare Namen sind eindeutig (ohne Groß-/Kleinschreibung): Ein
+  Anzeigename darf weder einem anderen Anzeigenamen noch einem fremden
+  Anmeldenamen entsprechen.
+- Jeder pflegt seinen Anzeigenamen unter Einstellungen → Profil; Admins
+  können ihn unter Einstellungen → Benutzer für alle setzen und sehen dort
+  beide Namen.
+
 ## Projekte und Rechte
 
 - Jeder Eintrag gehört zu genau einem Projekt.
@@ -124,7 +137,7 @@ Journal, Report und Hindernisse:
 
 Für alle Benutzer:
 
-1. **Passwort ändern.**
+1. **Profil:** Anzeigename und Passwort ändern.
 2. **Report-Woche:** Slider über Mo–So, welche Wochentage der eigene Report
    anzeigt; Schnellwahl „Mo–Fr“ und „Mo–So“. Standard ist Mo–So. Gilt nur
    für den jeweiligen Benutzer.
@@ -137,7 +150,8 @@ Nur für Admins:
    Zeilen, je Zeile ein Mülleimer. Projekte mit Einträgen können nicht
    gelöscht werden. Namen sind eindeutig (ohne Beachtung von Groß- und
    Kleinschreibung).
-5. **Admin-Rechte** erteilen und entziehen.
+5. **Benutzer:** Anmeldename, editierbarer Anzeigename und Admin-Rechte
+   (erteilen/entziehen) aller Benutzer.
 6. **Registrierung:** Schalter, ob sich neue Benutzer selbst registrieren
    können (Standard an). Aus: Der Link „Registrieren“ auf der Login-Seite
    verschwindet.
