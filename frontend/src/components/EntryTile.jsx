@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Lock, Trash2 } from 'lucide-react';
 import ReactionBar from './ReactionBar';
+import { today } from '../dates';
 import DeletedBanner from './DeletedBanner';
 
 const EDITABLE = ['title', 'content', 'obstacles', 'entry_date', 'entry_time', 'done'];
@@ -72,10 +73,14 @@ export default function EntryTile({ entry, showAuthor, showDelete, autoFocus, on
             type="date"
             required
             readOnly={fieldsLocked}
+            max={today()}
             value={draft.entry_date}
             onChange={e => {
-              set('entry_date', e.target.value);
-              if (e.target.value) commit({ entry_date: e.target.value });
+              const value = e.target.value;
+              // Typed-in future dates are ignored (max only limits the picker).
+              if (value && value > today()) return set('entry_date', entry.entry_date);
+              set('entry_date', value);
+              if (value) commit({ entry_date: value });
             }}
           />
         </label>

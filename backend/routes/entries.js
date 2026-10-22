@@ -13,12 +13,17 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 const TEXT_FIELDS = ['title', 'content', 'obstacles'];
 
+// Entries can't lie in the future. One day of slack because the server runs
+// on UTC while users may already be past midnight in their time zone.
+const latestAllowedDate = () => new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
 // Validates/normalizes whatever subset of fields is present in the body.
 // Returns { values } or { error }.
 function parseFields(b) {
   const values = {};
   if ('entry_date' in b) {
     if (!DATE_RE.test(b.entry_date || '')) return { error: 'Gültiges Datum (JJJJ-MM-TT) erforderlich.' };
+    if (b.entry_date > latestAllowedDate()) return { error: 'Das Datum darf nicht in der Zukunft liegen.' };
     values.entry_date = b.entry_date;
   }
   if ('entry_time' in b) {

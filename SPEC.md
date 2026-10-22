@@ -107,7 +107,10 @@ Journal, Report und Hindernisse:
 
 ## Tab 1 – Journal
 
-- Eine Seite pro Tag, mit vor/zurück-Buttons und „Heute“-Button.
+- Eine Seite pro Tag, mit vor/zurück-Buttons und „Heute“-Button. In die
+  Zukunft geht es nicht: Bei „heute“ ist „weiter“ gesperrt, das Datumsfeld
+  einer Kachel erlaubt höchstens heute, und der Server lehnt künftige Daten
+  ab.
 - Weiße Kacheln, eine Kachel = ein Eintrag, direkt in der Kachel editierbar.
 - Unter den Kacheln: `+` (neuen Eintrag anlegen).
 - Mülleimer ganz rechts in der Reaktionszeile jeder Kachel (eigene Einträge,
@@ -117,7 +120,8 @@ Journal, Report und Hindernisse:
 
 ## Tab 2 – Report
 
-- Wochenansicht, mit vor/zurück-Buttons und „Heute“-Button.
+- Wochenansicht, mit vor/zurück-Buttons und „Heute“-Button; über die
+  aktuelle Woche hinaus lässt sich nicht blättern.
 - Alle Einträge der gewählten Woche, nach Tag gruppiert. Standard: neuester
   Tag oben (innerhalb eines Tages der späteste Eintrag oben); ein
   Umschalter neben der Überschrift dreht die Reihenfolge um.

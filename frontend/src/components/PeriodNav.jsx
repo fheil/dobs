@@ -2,7 +2,8 @@ import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Shared prev / label / next / "Heute" navigator for Journal (days) and
-// Report (weeks).
+// Report (weeks). The future isn't reachable: at the current day/week
+// (isToday) "next" is disabled too.
 export default function PeriodNav({ label, onPrev, onNext, onToday, isToday, prevTitle, nextTitle }) {
   return (
     <div className="period-nav">
@@ -10,7 +11,7 @@ export default function PeriodNav({ label, onPrev, onNext, onToday, isToday, pre
         <ChevronLeft size={18} />
       </button>
       {label && <span>{label}</span>}
-      <button type="button" className="icon" title={nextTitle} onClick={onNext}>
+      <button type="button" className="icon" title={nextTitle} onClick={onNext} disabled={isToday}>
         <ChevronRight size={18} />
       </button>
       <button type="button" className="icon period-today" onClick={onToday} disabled={isToday}>
