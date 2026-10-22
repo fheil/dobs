@@ -1,17 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { CheckSquare } from 'lucide-react';
-import { api, setSession } from '../api';
+import { api, setSession, ServerUnreachableError, SERVER_UNREACHABLE } from '../api';
 
 export default function Auth({ onLogin, error: externalError }) {
   const [register, setRegister] = useState(false);
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const [regEnabled, setRegEnabled] = useState(false);
+  const [serverDown, setServerDown] = useState(false);
 
+  // Asks whether sign-up is open; while the backend doesn't answer, shows a
+  // notice and retries every 10 s, so the page recovers on its own.
   useEffect(() => {
-    api('/auth/registration-status')
-      .then(d => setRegEnabled(d.enabled))
-      .catch(() => setRegEnabled(false));
+    let timer;
+    const check = () => api('/auth/registration-status')
+      .then(d => { setServerDown(false); setRegEnabled(d.enabled); })
+      .catch(e => {
+        setRegEnabled(false);
+        if (e instanceof ServerUnreachableError) {
+          setServerDown(true);
+          timer = setTimeout(check, 10000);
+        }
+      });
+    check();
+    return () => clearTimeout(timer);
   }, []);
 
   const submit = async e => {
@@ -29,7 +41,7 @@ export default function Auth({ onLogin, error: externalError }) {
     }
   };
 
-  const shownError = error || externalError;
+  const shownError = error || externalError || (serverDown ? SERVER_UNREACHABLE : '');
 
   return (
     <div className="auth">

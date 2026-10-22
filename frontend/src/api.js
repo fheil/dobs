@@ -36,16 +36,35 @@ export function watchSessionChanges() {
   return () => window.removeEventListener('storage', onStorage);
 }
 
+export const SERVER_UNREACHABLE = 'Server nicht erreichbar – bitte später erneut versuchen.';
+
+// Network failure or a non-JSON reply (e.g. the proxy's 502 page while the
+// backend is down) becomes one plain message - no technical details for users.
+export class ServerUnreachableError extends Error {
+  constructor() { super(SERVER_UNREACHABLE); }
+}
+
 export async function api(path, options = {}) {
-  const res = await fetch(`${API}/api${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-      ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {})
-    }
-  });
-  const data = res.status === 204 ? null : await res.json();
+  let res;
+  try {
+    res = await fetch(`${API}/api${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+        ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {})
+      }
+    });
+  } catch {
+    throw new ServerUnreachableError();
+  }
+  if (res.status === 204) return null;
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    throw new ServerUnreachableError();
+  }
   if (!res.ok) throw Error(data?.error || 'Anfrage fehlgeschlagen');
   return data;
 }

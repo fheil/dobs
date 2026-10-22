@@ -5,9 +5,35 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const dataDir = process.env.DATA_DIR || '/app/data';
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+const dbFile = path.join(dataDir, 'dobs.db');
 
-const db = new DatabaseSync(path.join(dataDir, 'dobs.db'));
+// Most common deployment mistake: a host data dir not owned by the
+// container user. Fail with a message that says how to fix it.
+function exitDataDirNotWritable(cause) {
+  const uid = process.getuid?.() ?? '?';
+  console.error(
+    `Datenverzeichnis ${dataDir} ist für den Backend-User (UID ${uid}) nicht beschreibbar` +
+    (cause ? ` (${cause})` : '') + '.\n' +
+    `Auf dem Host das gemountete Verzeichnis dem Container-User geben, z. B.: chown -R ${uid}:${uid} <BASE_DIR>/<BINDS>/data`
+  );
+  process.exit(1);
+}
+
+try {
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  fs.accessSync(dataDir, fs.constants.R_OK | fs.constants.W_OK);
+  if (fs.existsSync(dbFile)) fs.accessSync(dbFile, fs.constants.R_OK | fs.constants.W_OK);
+} catch (e) {
+  exitDataDirNotWritable(e.code);
+}
+
+let db;
+try {
+  db = new DatabaseSync(dbFile);
+} catch (e) {
+  if (e.errcode === 14) exitDataDirNotWritable('SQLITE_CANTOPEN'); // e.g. WAL/SHM files owned by another user
+  throw e;
+}
 
 // busy_timeout: wait up to 5 s for a lock (e.g. held by sqlite-web) instead
 // of failing right away.

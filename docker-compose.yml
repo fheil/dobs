@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=${NODE_ENV}
-      # NOTE: frontend/nginx.conf hardcodes "dobs-backend:8050" at build time
+      # NOTE: frontend/nginx.conf hardcodes "dobs-backend:8050" (set $backend)
       # and does NOT read this variable. If you change PORT, update nginx.conf too.
       - PORT=${PORT}
       - JWT_SECRET=${JWT_SECRET}
