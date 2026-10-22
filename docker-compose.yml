@@ -1,8 +1,20 @@
+# Optional proxy for the image builds (npm install needs registry.npmjs.org).
+# Empty when unset; Docker treats these as predefined build args, so they are
+# not stored in the image.
+x-proxy-args: &proxy-args
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-}
+  http_proxy: ${HTTP_PROXY:-}
+  https_proxy: ${HTTPS_PROXY:-}
+  no_proxy: ${NO_PROXY:-}
+
 services:
   dobs-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args: *proxy-args
     container_name: dobs-backend
     restart: unless-stopped
     environment:
@@ -35,6 +47,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args: *proxy-args
     container_name: dobs-frontend
     restart: unless-stopped
     networks:
