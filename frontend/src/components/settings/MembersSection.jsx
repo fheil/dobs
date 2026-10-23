@@ -8,14 +8,16 @@ export default function MembersSection({ user, onProjectsChanged }) {
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [roles, setRoles] = useState({});
+  const [leads, setLeads] = useState(new Set());
   const [error, setError] = useState('');
 
   useEffect(() => {
-    Promise.all([api('/admin/users'), api('/admin/projects'), api('/admin/members')])
-      .then(([u, p, m]) => {
+    Promise.all([api('/admin/users'), api('/admin/projects'), api('/admin/members'), api('/admin/leads')])
+      .then(([u, p, m, l]) => {
         setUsers(u);
         setProjects(p);
         setRoles(Object.fromEntries(m.map(x => [memberKey(x.project_id, x.user_id), x.role])));
+        setLeads(new Set(l.map(x => memberKey(x.project_id, x.user_id))));
       })
       .catch(e => setError(e.message));
   }, []);
@@ -63,6 +65,7 @@ export default function MembersSection({ user, onProjectsChanged }) {
                   </td>
                   {projects.map(p => {
                     const value = roles[memberKey(p.id, u.id)] || '';
+                    const isLead = leads.has(memberKey(p.id, u.id));
                     return (
                       <td key={p.id}>
                         <select
@@ -70,10 +73,12 @@ export default function MembersSection({ user, onProjectsChanged }) {
                           value={value}
                           onChange={e => change(p.id, u.id, e.target.value)}
                         >
-                          <option value="">–</option>
-                          <option value="read">Lesen</option>
+                          {/* A project lead always has "Lesen+Schreiben" until the lead role is removed. */}
+                          <option value="" disabled={isLead}>–</option>
+                          <option value="read" disabled={isLead}>Lesen</option>
                           <option value="write">Lesen+Schreiben</option>
                         </select>
+                        {isLead && <span className="lead-badge" title="Projektleitung">PL</span>}
                       </td>
                     );
                   })}

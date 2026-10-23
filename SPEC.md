@@ -55,7 +55,13 @@ dabei aufgetreten sind. Mehrere Benutzer arbeiten in gemeinsamen Projekten.
 - Benutzer werden Projekten mit „Lesen“ oder „Lesen+Schreiben“ zugeordnet.
   Wer zugeordnet ist, sieht alle Einträge des Projekts (mit Autor). Ändern
   und löschen darf man nur eigene Einträge, und nur mit „Lesen+Schreiben“.
-- Admins verwalten Projekte, Zuordnungen und Admin-Rechte.
+- Neben „Admin“ gibt es die Rolle **Projektleitung**: pro Projekt höchstens
+  zwei Personen. Projektleitungen haben immer „Lesen+Schreiben“: Beim
+  Ernennen werden sie zugeordnet bzw. hochgestuft; zurückstufen oder
+  entfernen lässt sich ihre Projektzuordnung erst, wenn sie nicht mehr
+  Projektleitung sind. (Welche
+  Rechte die Projektleitung genau hat, folgt.)
+- Admins verwalten Projekte, Zuordnungen, Projektleitungen und Admin-Rechte.
   Der erste registrierte Benutzer wird Admin; den eigenen Admin-Status kann
   man nicht ändern. Wer ein Projekt anlegt, wird ihm mit „Lesen+Schreiben“
   zugeordnet.
@@ -161,10 +167,13 @@ Nur für Admins:
    Kleinschreibung).
 5. **Benutzer:** Anmeldename, editierbarer Anzeigename und Admin-Rechte
    (erteilen/entziehen) aller Benutzer.
-6. **Registrierung:** Schalter, ob sich neue Benutzer selbst registrieren
+6. **Projektleitung:** pro Projekt bis zu zwei Personen auswählen. In der
+   Projektzuordnung sind Projektleitungen mit „PL“ markiert und lassen sich
+   dort weder zurückstufen noch entfernen.
+7. **Registrierung:** Schalter, ob sich neue Benutzer selbst registrieren
    können (Standard an). Aus: Der Link „Registrieren“ auf der Login-Seite
    verschwindet.
-7. **Löschen & Sperren** (gilt für alle Projekte):
+8. **Löschen & Sperren** (gilt für alle Projekte):
    - *Einträge löschen erlaubt* (Hauptschalter, Standard an)
    - *Erledigte Einträge löschbar* (Standard aus: erst „Erledigt“
      herausnehmen)

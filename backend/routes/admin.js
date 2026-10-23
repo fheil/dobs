@@ -125,6 +125,11 @@ router.put('/members', (req, res) => {
   if (!db.prepare('SELECT 1 FROM projects WHERE id = ?').get(project_id) || !db.prepare('SELECT 1 FROM users WHERE id = ?').get(user_id)) {
     return res.status(404).json({ error: 'Projekt oder Benutzer nicht gefunden.' });
   }
+  // A project lead always has "Lesen+Schreiben": no downgrade, no removal
+  // until the lead role is taken away.
+  if (role !== 'write' && db.prepare('SELECT 1 FROM project_leads WHERE project_id = ? AND user_id = ?').get(project_id, user_id)) {
+    return res.status(409).json({ error: 'Diese Person ist Projektleitung und hat immer Lesen+Schreiben – erst die Projektleitung entfernen.' });
+  }
   if (role === null) {
     db.prepare('DELETE FROM project_members WHERE project_id = ? AND user_id = ?').run(project_id, user_id);
   } else {
@@ -134,6 +139,44 @@ router.put('/members', (req, res) => {
     `).run(project_id, user_id, role);
   }
   res.json({ project_id, user_id, role });
+});
+
+// ----- Projektleitung -----
+
+export const MAX_LEADS = 2;
+
+router.get('/leads', (_req, res) => {
+  res.json(db.prepare('SELECT project_id, user_id FROM project_leads').all());
+});
+
+// Body: { user_ids: [id, ...] } - replaces the project's leads (0 to 2 people).
+// Leads always get "Lesen+Schreiben" (added, or upgraded from "Lesen").
+router.put('/projects/:id/leads', (req, res) => {
+  const projectId = Number(req.params.id);
+  if (!db.prepare('SELECT 1 FROM projects WHERE id = ?').get(projectId)) {
+    return res.status(404).json({ error: 'Projekt nicht gefunden.' });
+  }
+  const raw = req.body?.user_ids;
+  const ids = Array.isArray(raw) ? [...new Set(raw.map(Number))] : null;
+  if (!ids || ids.some(id => !Number.isInteger(id))) return res.status(400).json({ error: 'Ungültige Auswahl.' });
+  if (ids.length > MAX_LEADS) return res.status(400).json({ error: `Höchstens ${MAX_LEADS} Personen können ein Projekt leiten.` });
+  if (ids.some(id => !db.prepare('SELECT 1 FROM users WHERE id = ?').get(id))) {
+    return res.status(404).json({ error: 'Benutzer nicht gefunden.' });
+  }
+  transaction(() => {
+    db.prepare('DELETE FROM project_leads WHERE project_id = ?').run(projectId);
+    for (const id of ids) {
+      db.prepare('INSERT INTO project_leads (project_id, user_id) VALUES (?, ?)').run(projectId, id);
+      db.prepare(`
+        INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'write')
+        ON CONFLICT (project_id, user_id) DO UPDATE SET role = 'write'
+      `).run(projectId, id);
+    }
+  });
+  res.json({
+    leads: db.prepare('SELECT project_id, user_id FROM project_leads WHERE project_id = ?').all(projectId),
+    members: db.prepare('SELECT project_id, user_id, role FROM project_members WHERE project_id = ?').all(projectId)
+  });
 });
 
 export default router;

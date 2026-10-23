@@ -1314,3 +1314,15 @@ main {
   font-size: 0.85rem;
   white-space: nowrap;
 }
+
+.lead-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent-700);
+  vertical-align: middle;
+}

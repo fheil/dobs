@@ -89,6 +89,14 @@ CREATE TABLE IF NOT EXISTS project_members (
   PRIMARY KEY (project_id, user_id)
 );
 
+-- Project leads: a role next to "admin", but per project and at most two
+-- people (enforced in routes/admin.js). A lead is always also a member.
+CREATE TABLE IF NOT EXISTS project_leads (
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  PRIMARY KEY (project_id, user_id)
+);
+
 CREATE TABLE IF NOT EXISTS entries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
