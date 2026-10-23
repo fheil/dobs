@@ -71,7 +71,8 @@ export default function LeadsSection({ user, onProjectsChanged }) {
                     {Array.from({ length: MAX_LEADS }, (_, slot) => (
                       <td key={slot}>
                         <select
-                          className={`role-select ${current[slot] ? 'write' : 'none'}`}
+                          className={`role-select lead-select ${current[slot] ? 'write' : 'none'}`}
+                          title={users.find(u => u.id === current[slot]) ? label(users.find(u => u.id === current[slot])) : ''}
                           value={current[slot] ?? ''}
                           // The second slot only makes sense once the first is set.
                           disabled={slot > 0 && !current[0]}

@@ -1326,3 +1326,13 @@ main {
   background: var(--accent-700);
   vertical-align: middle;
 }
+
+/* Fixed width, so the field doesn't jump with the length of the chosen
+   name; long names are cut off with an ellipsis (full name as tooltip). */
+.lead-select {
+  width: 16rem;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
