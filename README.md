@@ -31,7 +31,7 @@ nur per SSH-Tunnel nutzen).
 | `PORT` | Backend-Port (Standard 8050; bei Änderung auch `frontend/nginx.conf` anpassen) |
 | `BASE_DIR`, `BINDS` | Bind-Mount für das Datenverzeichnis |
 | `ACCENT_COLOR` | Akzentfarbe als `#rrggbb` (Standard `#65a30d`, Lime); alle Abstufungen werden daraus berechnet. Wird zur Laufzeit gelesen – Neustart reicht, kein Rebuild |
-| `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY` | Optionaler Proxy für den Image-Build (braucht `registry.npmjs.org`, `github.com`, `release-assets.githubusercontent.com`); leer lassen bei direktem Internetzugang |
+| `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY` | Optionaler Proxy für den Image-Build (braucht `registry.npmjs.org`); leer lassen bei direktem Internetzugang |
 | `COMPOSE_PROFILES`, `SQLITE_WEB_PORT` | `tools` startet zusätzlich sqlite-web (ohne Login, nur lokal binden) |
 
 ### Ohne Traefik

@@ -1278,3 +1278,39 @@ main {
   border-bottom: 1px solid var(--slate-100);
   margin-bottom: 1.5rem;
 }
+
+/* Report sort selector */
+.sort-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  background: #e2e8f0;
+  border-radius: 10px;
+  padding: 0 0.3rem 0 0.7rem;
+  color: var(--slate-700);
+}
+
+.sort-select select {
+  width: auto;
+  margin: 0;
+  padding: 0.45rem 0.4rem;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sort-select select:focus {
+  outline: none;
+}
+
+.sort-select:focus-within {
+  outline: 2px solid var(--accent-700);
+}
+
+.date-link {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}

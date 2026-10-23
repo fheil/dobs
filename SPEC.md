@@ -85,9 +85,9 @@ Journal, Report und Hindernisse:
 - **1–5 Sterne:** eine Bewertung pro Benutzer, nur die eigene änderbar;
   ein Klick auf das linke Drittel des ersten Sterns (Vorschau: alle Sterne
   leer) oder erneut auf den gesetzten Stern nimmt sie zurück.
-- **Durchschnitt in %** (Ø Sterne / 5) mit Anzahl der Bewertungen. Klick
-  öffnet ein kleines Fenster mit der Verteilung wie bei Amazon: je
-  Sternzahl Balken, Anteil in % und Anzahl.
+- **Durchschnitt in %** (Ø Sterne / 5) mit Anzahl der Bewertungen. Ein
+  Klick öffnet ein kleines Fenster mit der Verteilung der Bewertungen: je
+  Sternzahl ein Balken mit Anteil in % und Anzahl.
 - **🙋 Unterstützung anbieten:** an/aus pro Benutzer, bei jedem Eintrag
   (nicht nur bei Hindernissen). Klick auf die Anzahl zeigt die Namen derer,
   die Unterstützung anbieten.
@@ -122,9 +122,14 @@ Journal, Report und Hindernisse:
 
 - Wochenansicht, mit vor/zurück-Buttons und „Heute“-Button; über die
   aktuelle Woche hinaus lässt sich nicht blättern.
-- Alle Einträge der gewählten Woche, nach Tag gruppiert. Standard: neuester
-  Tag oben (innerhalb eines Tages der späteste Eintrag oben); ein
-  Umschalter neben der Überschrift dreht die Reihenfolge um.
+- Alle Einträge der gewählten Woche. Sortierung per Auswahl neben der
+  Überschrift (pro Browser gemerkt):
+  - *Neueste zuerst* (Standard) / *Älteste zuerst*: nach Tagen gruppiert,
+    innerhalb eines Tages in derselben Richtung.
+  - *Beste Bewertung zuerst* / *Niedrigste Bewertung zuerst*: eine Liste
+    nach Durchschnittsbewertung, jeder Eintrag mit Datum; nicht bewertete
+    Einträge stehen immer am Ende; bei Gleichstand zuerst der mit mehr
+    Bewertungen, dann der neuere.
 - Es werden nur die Wochentage aus der persönlichen Einstellung
   „Report-Woche“ angezeigt.
 - Ein Klick auf einen Tag öffnet ihn im Journal.
